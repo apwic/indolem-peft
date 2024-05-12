@@ -140,7 +140,7 @@ class ModelArguments:
         default="main",
         metadata={"help": "The specific model version to use (can be a branch name, tag name or commit id)."},
     )
-    use_auth_token: bool = field(
+    token: bool = field(
         default=False,
         metadata={
             "help": (
@@ -230,7 +230,7 @@ def main():
             "csv",
             data_files=data_files,
             cache_dir=model_args.cache_dir,
-            use_auth_token=True if model_args.use_auth_token else None,
+            token=True if model_args.token else None,
         )
     else:
         # Loading a dataset from local json files
@@ -238,7 +238,7 @@ def main():
             "json",
             data_files=data_files,
             cache_dir=model_args.cache_dir,
-            use_auth_token=True if model_args.use_auth_token else None,
+            token=True if model_args.token else None,
         )
 
     # Labels
@@ -257,14 +257,14 @@ def main():
         num_labels=num_labels,
         cache_dir=model_args.cache_dir,
         revision=model_args.model_revision,
-        use_auth_token=True if model_args.use_auth_token else None,
+        token=True if model_args.token else None,
     )
     tokenizer = AutoTokenizer.from_pretrained(
         model_args.tokenizer_name if model_args.tokenizer_name else model_args.model_name_or_path,
         cache_dir=model_args.cache_dir,
         use_fast=model_args.use_fast_tokenizer,
         revision=model_args.model_revision,
-        use_auth_token=True if model_args.use_auth_token else None,
+        token=True if model_args.token else None,
     )
     # We use the AutoAdapterModel class here for better adapter support.
     model = AutoAdapterModel.from_pretrained(
@@ -273,7 +273,7 @@ def main():
         config=config,
         cache_dir=model_args.cache_dir,
         revision=model_args.model_revision,
-        use_auth_token=True if model_args.use_auth_token else None,
+        token=True if model_args.token else None,
         ignore_mismatched_sizes=model_args.ignore_mismatched_sizes,
     )
 
@@ -281,6 +281,7 @@ def main():
     adapters.init(model)
 
     model.add_classification_head(
+        "sentiment",
         num_labels=num_labels,
         id2label={i: v for i, v in enumerate(label_list)},
     )
@@ -304,21 +305,20 @@ def main():
 
     # Some models have set the order of the labels to use, so let's make sure we do use it.
     label_to_id = None
-    if (
-        model.config.label2id != PretrainedConfig(num_labels=num_labels).label2id
-    ):
-        # Some have all caps in their config, some don't.
-        label_name_to_id = {k.lower(): v for k, v in model.config.label2id.items()}
-        if list(sorted(label_name_to_id.keys())) == list(sorted(label_list)):
-            label_to_id = {i: int(label_name_to_id[label_list[i]]) for i in range(num_labels)}
+    if model.config.label2id:
+        label_name_to_id = {}
+        for key, value in model.config.label2id.items():
+            if isinstance(key, str):
+                label_name_to_id[key.lower()] = value
+            else:
+                label_name_to_id[key] = value  # Directly use the integer key as is
+
+        # Adjusting label ID mapping
+        if label_list and isinstance(label_list[0], str):
+            label_to_id = {label_name_to_id[label.lower()]: i for i, label in enumerate(label_list) if label.lower() in label_name_to_id}
         else:
-            logger.warning(
-                "Your model seems to have been trained with labels, but they don't match the dataset: ",
-                f"model labels: {list(sorted(label_name_to_id.keys()))}, dataset labels: {list(sorted(label_list))}."
-                "\nIgnoring the model labels as a result.",
-            )
-    else:
-        label_to_id = {v: i for i, v in enumerate(label_list)}
+            # Assuming label_list is already in the correct integer form or does not need conversion
+            label_to_id = {label: i for i, label in enumerate(label_list)}
 
     if label_to_id is not None:
         model.config.label2id = label_to_id
