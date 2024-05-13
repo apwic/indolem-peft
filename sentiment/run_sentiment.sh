@@ -6,10 +6,8 @@ NUM_EPOCHS=20
 LEARNING_RATE=5e-5
 SEED=1
 
-# Assuming the data directory is correctly structured
 DATA_DIR=./data
 
-# Loop through each fold
 for i in {0..4}
 do
     echo "Training on fold $i"
