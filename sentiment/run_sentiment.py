@@ -218,7 +218,7 @@ def main():
             ), "`test_file` should have the same extension (csv or json) as `train_file`."
             data_files["test"] = data_args.test_file
         else:
-            raise ValueError("Need either a GLUE task or a test file for `do_predict`.")
+            raise ValueError("Need a test file for `do_predict`.")
 
     for key in data_files.keys():
         logger.info(f"load a local file for {key}: {data_files[key]}")
@@ -337,7 +337,7 @@ def main():
         )
         result = tokenizer(*args, padding=padding, max_length=max_seq_length, truncation=True)
 
-        # Map labels to IDs (not necessary for GLUE tasks)
+        # Map labels to IDs
         if label_to_id is not None and "label" in examples:
             result["label"] = [(label_to_id[l] if l != -1 else -1) for l in examples["label"]]
         return result

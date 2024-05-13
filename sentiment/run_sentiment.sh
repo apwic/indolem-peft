@@ -1,10 +1,8 @@
 #!/bin/bash
-
 MAX_LENGTH=200
 BERT_MODEL="indolem/indobert-base-uncased"
 BATCH_SIZE=30
 NUM_EPOCHS=20
-SAVE_STEPS=750
 LEARNING_RATE=5e-5
 SEED=1
 
@@ -12,11 +10,11 @@ SEED=1
 DATA_DIR=./data
 
 # Loop through each fold
-for i in {0..0}
+for i in {0..4}
 do
     echo "Training on fold $i"
 
-    OUTPUT_DIR="bin/indoner$i"
+    OUTPUT_DIR="bin/indolem-sentiment-$i"
     TRAIN_FILE="$DATA_DIR/train$i.csv"
     VALIDATION_FILE="$DATA_DIR/dev$i.csv"
     TEST_FILE="$DATA_DIR/test$i.csv"
@@ -32,10 +30,10 @@ do
         --num_train_epochs $NUM_EPOCHS \
         --per_device_train_batch_size $BATCH_SIZE \
         --learning_rate $LEARNING_RATE \
-        --save_steps $SAVE_STEPS \
         --seed $SEED \
         --evaluation_strategy "epoch" \
         --logging_strategy "epoch" \
+        --save_strategy "epoch" \
         --report_to "wandb" \
         --push_to_hub 1 \
         --do_train \
