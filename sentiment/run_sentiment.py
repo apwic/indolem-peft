@@ -19,13 +19,12 @@ from transformers import (
     DataCollatorWithPadding,
     EvalPrediction,
     HfArgumentParser,
-    PretrainedConfig,
     Trainer,
     TrainingArguments,
     default_data_collator,
     set_seed,
 )
-from sklearn.metrics import f1_score
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from transformers.trainer_utils import get_last_checkpoint
 from transformers.utils import check_min_version
 from transformers.utils.versions import require_version
@@ -381,14 +380,17 @@ def main():
             logger.info(f"Sample {index} of the training set: {train_dataset[index]}.")
 
     # Get the metric function
-    metric = evaluate.load("f1")
-
     def compute_metrics(p: EvalPrediction):
-        preds = p.predictions[0] if isinstance(p.predictions, tuple) else p.predictions
-        preds = np.argmax(preds, axis=1)
-        f1 = f1_score(y_true=p.label_ids, y_pred=preds, average='weighted')  # Use 'binary' for binary classification if needed
-        return {"f1": f1}
-    
+        predictions, labels = p
+        predictions = np.argmax(predictions, axis=1)
+
+        return {
+            "accuracy": accuracy_score(labels, predictions),
+            "precision": precision_score(labels, predictions, average='macro'),
+            "recall": recall_score(labels, predictions, average='macro'),
+            "f1": f1_score(labels, predictions, average='macro'),
+        }
+
     # Data collator will default to DataCollatorWithPadding when the tokenizer is passed to Trainer, so we change it if
     # we already did the padding.
     if data_args.pad_to_max_length:
@@ -468,12 +470,7 @@ def main():
                             item = label_list[item]
                             writer.write(f"{index}\t{item}\n")
 
-    kwargs = {"finetuned_from": model_args.model_name_or_path, "tasks": "text-classification"}
-    if data_args.task_name is not None:
-        kwargs["language"] = "en"
-        kwargs["dataset_tags"] = "glue"
-        kwargs["dataset_args"] = data_args.task_name
-        kwargs["dataset"] = f"GLUE {data_args.task_name.upper()}"
+    kwargs = {"finetuned_from": model_args.model_name_or_path, "tasks": "sentiment", "language": "id"}
 
     if training_args.push_to_hub:
         trainer.push_to_hub(**kwargs)

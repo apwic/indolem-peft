@@ -34,6 +34,10 @@ do
         --learning_rate $LEARNING_RATE \
         --save_steps $SAVE_STEPS \
         --seed $SEED \
+        --evaluation_strategy "epoch" \
+        --logging_strategy "epoch" \
+        --report_to "wandb" \
+        --push_to_hub 1 \
         --do_train \
         --do_eval \
         --do_predict
