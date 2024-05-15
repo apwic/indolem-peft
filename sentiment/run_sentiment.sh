@@ -8,18 +8,19 @@ SEED=1
 
 DATA_DIR=./data
 
-for i in {0..4}
+for i in {0..0}
 do
     echo "Training on fold $i"
 
-    OUTPUT_DIR="bin/indolem-sentiment-$i"
+    OUTPUT_DIR="bin/sentiment-base-$i"
     TRAIN_FILE="$DATA_DIR/train$i.csv"
     VALIDATION_FILE="$DATA_DIR/dev$i.csv"
     TEST_FILE="$DATA_DIR/test$i.csv"
 
     # Run the model training and evaluation
-    CUDA_VISIBLE_DEVICES=0 python run_sentiment.py \
+    python run_sentiment.py \
         --model_name_or_path $BERT_MODEL \
+        --label_names "labels" \
         --output_dir $OUTPUT_DIR \
         --train_file $TRAIN_FILE \
         --validation_file $VALIDATION_FILE \
@@ -32,11 +33,13 @@ do
         --evaluation_strategy "epoch" \
         --logging_strategy "epoch" \
         --save_strategy "epoch" \
-        --report_to "wandb" \
+        --report_to "tensorboard" "wandb" \
         --push_to_hub 1 \
+        --run_name "sentiment-base" \
         --do_train \
         --do_eval \
-        --do_predict
+        --do_predict \
+        --overwrite_output_dir
 
     echo "Finished training on fold $i"
 done

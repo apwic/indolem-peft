@@ -2,6 +2,7 @@ import logging
 import os
 import random
 import sys
+import warnings
 from dataclasses import dataclass, field
 from typing import Optional
 
@@ -32,7 +33,7 @@ from transformers.utils.versions import require_version
 # Will error if the minimal version of Transformers is not installed. Remove at your own risks.
 check_min_version("4.26.0")
 require_version("datasets>=1.8.0", "To fix: pip install -r requirements.txt")
-
+warnings.filterwarnings('ignore', category=FutureWarning)
 logger = logging.getLogger(__name__)
 
 @dataclass
@@ -181,7 +182,7 @@ def main():
 
     # Log on each process the small summary:
     logger.warning(
-        f"Process rank: {training_args.local_rank}, device: {training_args.device}, n_gpu: {training_args.n_gpu}"
+        f"Process rank: {training_args.local_rank}, device: {training_args.device}, n_gpu: {training_args.n_gpu}, "
         + f"distributed training: {bool(training_args.local_rank != -1)}, 16-bits training: {training_args.fp16}"
     )
     logger.info(f"Training/evaluation parameters {training_args}")
@@ -243,7 +244,7 @@ def main():
     # Labels
     # A useful fast method:
     # https://huggingface.co/docs/datasets/package_reference/main_classes.html#datasets.Dataset.unique
-    label_list = raw_datasets["train"].unique("label")
+    label_list = raw_datasets["train"].unique("labels")
     label_list.sort()  # Let's sort it for determinism
     num_labels = len(label_list)
 
@@ -286,7 +287,7 @@ def main():
     )
 
     # Preprocessing the raw_datasets
-    non_label_column_names = [name for name in raw_datasets["train"].column_names if name != "label"]
+    non_label_column_names = [name for name in raw_datasets["train"].column_names if name != "labels"]
     if "sentence1" in non_label_column_names and "sentence2" in non_label_column_names:
         sentence1_key, sentence2_key = "sentence1", "sentence2"
     else:
@@ -338,8 +339,8 @@ def main():
         result = tokenizer(*args, padding=padding, max_length=max_seq_length, truncation=True)
 
         # Map labels to IDs
-        if label_to_id is not None and "label" in examples:
-            result["label"] = [(label_to_id[l] if l != -1 else -1) for l in examples["label"]]
+        if label_to_id is not None and "labels" in examples:
+            result["labels"] = [(label_to_id[l] if l != -1 else -1) for l in examples["labels"]]
         return result
 
     with training_args.main_process_first(desc="dataset map pre-processing"):
@@ -380,9 +381,9 @@ def main():
             logger.info(f"Sample {index} of the training set: {train_dataset[index]}.")
 
     # Get the metric function
-    def compute_metrics(p: EvalPrediction):
-        predictions, labels = p
-        predictions = np.argmax(predictions, axis=1)
+    def compute_metrics(p):
+        logits, labels = p
+        predictions = np.argmax(logits, axis=1)
 
         return {
             "accuracy": accuracy_score(labels, predictions),
@@ -409,9 +410,9 @@ def main():
         args=training_args,
         train_dataset=train_dataset if training_args.do_train else None,
         eval_dataset=eval_dataset if training_args.do_eval else None,
-        compute_metrics=compute_metrics,
         tokenizer=tokenizer,
         data_collator=data_collator,
+        compute_metrics=compute_metrics,
     )
 
     # Training
@@ -457,8 +458,10 @@ def main():
 
         for predict_dataset in predict_datasets:
             # Removing the `label` columns because it contains -1 and Trainer won't like that.
-            predict_dataset = predict_dataset.remove_columns("label")
+            labels= predict_dataset["labels"]
+            predict_dataset = predict_dataset.remove_columns("labels")
             predictions = trainer.predict(predict_dataset, metric_key_prefix="predict").predictions
+            metrics = compute_metrics(EvalPrediction(predictions=predictions, label_ids=labels))
             predictions = np.argmax(predictions, axis=1)
 
             output_predict_file = os.path.join(training_args.output_dir, f"predict_results.txt")
