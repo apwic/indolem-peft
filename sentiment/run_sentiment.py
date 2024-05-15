@@ -154,6 +154,16 @@ class ModelArguments:
         metadata={"help": "Will enable to load a pretrained model whose head dimensions are different."},
     )
 
+@dataclass
+class AdapterArguments(AdapterArguments):
+    """
+    Extended arguments for adapter training.
+    """
+    adapter_name: Optional[str] = field(
+        default="adapter-sentiment",
+        metadata={"help": "The name of the adapter to be added."}
+    )
+
 def main():
     parser = HfArgumentParser((ModelArguments, DataTrainingArguments, TrainingArguments, AdapterArguments))
 
@@ -402,7 +412,7 @@ def main():
         data_collator = None
 
     # Setup adapters
-    setup_adapter_training(model, adapter_args, "adapter_sentiment")
+    setup_adapter_training(model, adapter_args, adapter_args.adapter_name)
     # Initialize our Trainer
     trainer_class = AdapterTrainer if adapter_args.train_adapter else Trainer
     trainer = trainer_class(
@@ -414,6 +424,9 @@ def main():
         data_collator=data_collator,
         compute_metrics=compute_metrics,
     )
+
+    # Print model summary
+    logger.warning(model.adapter_summary())
 
     # Training
     if training_args.do_train:
@@ -463,6 +476,9 @@ def main():
             predictions = trainer.predict(predict_dataset, metric_key_prefix="predict").predictions
             metrics = compute_metrics(EvalPrediction(predictions=predictions, label_ids=labels))
             predictions = np.argmax(predictions, axis=1)
+
+            trainer.log_metrics("test", metrics)
+            trainer.save_metrics("test", metrics)
 
             output_predict_file = os.path.join(training_args.output_dir, f"predict_results.txt")
             if trainer.is_world_process_zero():

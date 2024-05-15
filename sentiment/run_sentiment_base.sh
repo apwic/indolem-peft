@@ -34,7 +34,7 @@ do
         --logging_strategy "epoch" \
         --save_strategy "epoch" \
         --report_to "tensorboard" "wandb" \
-        --push_to_hub 1 \
+        --push_to_hub \
         --run_name "sentiment-base" \
         --do_train \
         --do_eval \
