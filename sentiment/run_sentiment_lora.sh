@@ -1,4 +1,5 @@
 #!/bin/bash
+export WANDB_PROJECT="indolem-pelt"
 MAX_LENGTH=200
 BERT_MODEL="indolem/indobert-base-uncased"
 BATCH_SIZE=30
@@ -29,10 +30,10 @@ do
         --num_train_epochs $NUM_EPOCHS \
         --per_device_train_batch_size $BATCH_SIZE \
         --learning_rate $LEARNING_RATE \
-        --seed $SEED \
         --evaluation_strategy "epoch" \
         --logging_strategy "epoch" \
         --save_strategy "epoch" \
+        --save_total_limit 1 \
         --report_to "tensorboard" "wandb" \
         --push_to_hub \
         --run_name "sentiment-lora" \
