@@ -1,5 +1,5 @@
 #!/bin/bash
-export WANDB_PROJECT="indolem-pelt"
+export WANDB_PROJECT="indolem-pelt-sentiment"
 MAX_LENGTH=200
 BERT_MODEL="indolem/indobert-base-uncased"
 BATCH_SIZE=30
@@ -12,7 +12,7 @@ DATA_DIR=./data
 # Define hyperparameter arrays for prefix length
 declare -a prefix_lengths=("10" "20" "30")
 
-for i in {0..0}
+for i in {1..1}
 do
     for prefix_length in "${prefix_lengths[@]}"
     do
@@ -41,7 +41,7 @@ do
             --save_total_limit 1 \
             --report_to "tensorboard" "wandb" \
             --push_to_hub \
-            --run_name "sentiment-pt-pl${prefix_length}" \
+            --run_name "sentiment-pt-pl${prefix_length}-$i" \
             --do_train \
             --do_eval \
             --do_predict \

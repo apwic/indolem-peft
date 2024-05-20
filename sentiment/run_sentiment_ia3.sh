@@ -1,5 +1,5 @@
 #!/bin/bash
-export WANDB_PROJECT="indolem-pelt"
+export WANDB_PROJECT="indolem-pelt-sentiment"
 MAX_LENGTH=200
 BERT_MODEL="indolem/indobert-base-uncased"
 BATCH_SIZE=30
@@ -9,11 +9,11 @@ SEED=1
 
 DATA_DIR=./data
 
-for i in {0..0}
+for i in {1..1}
 do
     echo "Training on fold $i with IA3"
     
-    OUTPUT_DIR="bin/sentiment-ia3"
+    OUTPUT_DIR="bin/sentiment-ia3-$i"
     TRAIN_FILE="$DATA_DIR/train$i.csv"
     VALIDATION_FILE="$DATA_DIR/dev$i.csv"
     TEST_FILE="$DATA_DIR/test$i.csv"
@@ -36,7 +36,7 @@ do
         --save_total_limit 1 \
         --report_to "tensorboard" "wandb" \
         --push_to_hub \
-        --run_name "sentiment-ia3" \
+        --run_name "sentiment-ia3-$i" \
         --do_train \
         --do_eval \
         --do_predict \

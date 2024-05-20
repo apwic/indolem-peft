@@ -1,5 +1,5 @@
 #!/bin/bash
-export WANDB_PROJECT="indolem-pelt"
+export WANDB_PROJECT="indolem-pelt-sentiment"
 MAX_LENGTH=200
 BERT_MODEL="indolem/indobert-base-uncased"
 BATCH_SIZE=30
@@ -14,7 +14,7 @@ declare -a ranks=("2" "4" "8")
 declare -a alphas=("0" "1" "2")
 declare -a dropouts=("0.05" "0.1" "0.15")
 
-for i in {0..0}
+for i in {1..1}
 do
     for rank in "${ranks[@]}"
     do
