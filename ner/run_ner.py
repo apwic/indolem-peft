@@ -3,6 +3,7 @@ import os
 import random
 import sys
 import warnings
+import ast
 from dataclasses import dataclass, field
 from typing import Optional
 
@@ -266,10 +267,16 @@ def main():
 
     if data_args.label_column_name is not None:
         label_column_name = data_args.label_column_name
-    elif f"{data_args.task_name}_tags" in column_names:
-        label_column_name = f"{data_args.task_name}_tags"
     else:
         label_column_name = column_names[1]
+
+    # Convert the text and label from strings to lists
+    def convert_to_list(examples):
+        examples[text_column_name] = ast.literal_eval(examples[text_column_name])
+        examples[label_column_name] = ast.literal_eval(examples[label_column_name])
+        return examples
+
+    raw_datasets = raw_datasets.map(convert_to_list)
 
     # In the event the labels are not a `Sequence[ClassLabel]`, we will need to go through the dataset to get the
     # unique labels.
@@ -283,9 +290,9 @@ def main():
 
     # If the labels are of type ClassLabel, they are already integers and we have the map stored somewhere.
     # Otherwise, we have to get the list of labels manually.
-    labels_are_int = isinstance(features[label_column_name].feature, ClassLabel)
+    labels_are_int = isinstance(features[label_column_name], ClassLabel)
     if labels_are_int:
-        label_list = features[label_column_name].feature.names
+        label_list = features[label_column_name].names
         label_to_id = {i: i for i in range(len(label_list))}
     else:
         label_list = get_label_list(raw_datasets["train"][label_column_name])
@@ -334,7 +341,7 @@ def main():
         )
 
     # Model has labels -> use them.
-    if model.config.label2id != PretrainedConfig(num_labels=num_labels).label2id:
+    if model.config.label2id != None and model.config.label2id != PretrainedConfig(num_labels=num_labels).label2id:
         if list(sorted(model.config.label2id.keys())) == list(sorted(label_list)):
             # Reorganize `label_list` to match the ordering of the model.
             if labels_are_int:
@@ -490,7 +497,7 @@ def main():
             }
 
     # Setup adapters
-    setup_adapter_training(model, adapter_args, data_args.dataset_name or "ner")
+    setup_adapter_training(model, adapter_args, adapter_args.adapter_name)
     # Initialize our Trainer
     trainer_class = AdapterTrainer if adapter_args.train_adapter else Trainer
     trainer = trainer_class(
