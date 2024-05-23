@@ -1,5 +1,5 @@
 #!/bin/bash
-export WANDB_PROJECT="indolem-pelt-sentiment"
+export WANDB_PROJECT="indolem-pelt-sentiment-temp"
 MAX_LENGTH=200
 BERT_MODEL="indolem/indobert-base-uncased"
 BATCH_SIZE=30
@@ -42,6 +42,7 @@ do
             --save_total_limit 1 \
             --report_to "tensorboard" "wandb" \
             --push_to_hub \
+            --project_name "indolem-pelt-sentiment-temp" \
             --run_name "sentiment-pt-pl${prefix_length}-$i" \
             --do_train \
             --do_eval \
