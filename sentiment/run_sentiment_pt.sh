@@ -5,7 +5,7 @@ BERT_MODEL="indolem/indobert-base-uncased"
 BATCH_SIZE=30
 NUM_EPOCHS=20
 LEARNING_RATE=5e-5
-SEED=1
+SEED=42
 
 DATA_DIR=./data
 
@@ -35,6 +35,7 @@ do
             --num_train_epochs $NUM_EPOCHS \
             --per_device_train_batch_size $BATCH_SIZE \
             --learning_rate $LEARNING_RATE \
+            --seed $SEED \
             --evaluation_strategy "epoch" \
             --logging_strategy "epoch" \
             --save_strategy "epoch" \
