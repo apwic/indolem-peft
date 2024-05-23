@@ -11,7 +11,6 @@ import datasets
 import numpy as np
 from datasets import load_dataset, ClassLabel
 
-import torch
 import wandb
 import adapters
 import evaluate
@@ -186,8 +185,18 @@ class AdapterArguments(AdapterArguments):
     Extended arguments for adapter training.
     """
     adapter_name: Optional[str] = field(
-        default="adapter-sentiment",
+        default="adapter-ner",
         metadata={"help": "The name of the adapter to be added."}
+    )
+
+@dataclass
+class TrainingArguments(TrainingArguments):
+    """
+    Extended arguments for training arguments.
+    """
+    project_name: Optional[str] = field(
+        default=None,
+        metadata={"help": "The name of the project for wandb runs."}
     )
 
 def main():
@@ -240,6 +249,15 @@ def main():
 
     # Set seed before initializing model.
     set_seed(training_args.seed)
+
+    # Initiate wandb runs manually to log results manually
+    # outside of the training/evaluation loop
+    # Will be initialized from Trainer, if report_to wandb
+    if training_args.project_name is not None and training_args.run_name is not None:
+        wandb.init(project=training_args.project_name,
+                   name=training_args.run_name)
+    if training_args.project_name is not None:
+        wandb.init(project=training_args.project_name)
 
     # Loading a dataset from local files.
     # CSV/JSON/TXT training and evaluation files are needed.
@@ -575,6 +593,9 @@ def main():
 
         trainer.log_metrics("predict", metrics)
         trainer.save_metrics("predict", metrics)
+
+        if training_args.project_name is not None:
+            wandb.log(metrics)
 
         # Save predictions
         output_predictions_file = os.path.join(training_args.output_dir, "predictions.txt")

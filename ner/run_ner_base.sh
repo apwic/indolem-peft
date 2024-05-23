@@ -35,6 +35,7 @@ python run_ner.py \
     --save_strategy "epoch" \
     --save_total_limit 1 \
     --report_to "tensorboard" "wandb" \
+    --project_name "indolem-pelt-nerugm-temp" \
     --run_name "nerugm-base" \
     --do_train \
     --do_eval \
