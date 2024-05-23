@@ -477,8 +477,8 @@ def main():
             metrics = compute_metrics(EvalPrediction(predictions=predictions, label_ids=labels))
             predictions = np.argmax(predictions, axis=1)
 
-            trainer.log_metrics("test", metrics)
-            trainer.save_metrics("test", metrics)
+            trainer.log_metrics("predict", metrics)
+            trainer.save_metrics("predict", metrics)
 
             output_predict_file = os.path.join(training_args.output_dir, f"predict_results.txt")
             if trainer.is_world_process_zero():

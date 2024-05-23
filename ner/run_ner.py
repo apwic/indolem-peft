@@ -11,6 +11,8 @@ import datasets
 import numpy as np
 from datasets import load_dataset, ClassLabel
 
+import torch
+import wandb
 import adapters
 import evaluate
 import transformers
@@ -465,7 +467,9 @@ def main():
 
     def compute_metrics(p):
         predictions, labels = p
-        predictions = np.argmax(predictions, axis=2)
+
+        if isinstance(predictions, tuple):
+            predictions = predictions[0]
 
         # Remove ignored index (special tokens)
         true_predictions = [
@@ -495,7 +499,16 @@ def main():
                 "f1": results["overall_f1"],
                 "accuracy": results["overall_accuracy"],
             }
-
+        
+    def preprocess_logits_for_metrics(logits, labels):
+        """
+        Original Trainer may have a memory leak. 
+        This is a workaround to avoid storing too many tensors that are not needed.
+        """
+        if isinstance(logits, tuple):
+                logits = logits[0]
+        return logits.argmax(dim=-1)
+    
     # Setup adapters
     setup_adapter_training(model, adapter_args, adapter_args.adapter_name)
     # Initialize our Trainer
@@ -508,6 +521,7 @@ def main():
         tokenizer=tokenizer,
         data_collator=data_collator,
         compute_metrics=compute_metrics,
+        preprocess_logits_for_metrics=preprocess_logits_for_metrics
     )
 
     # Print model summary
@@ -550,7 +564,8 @@ def main():
         logger.info("*** Predict ***")
 
         predictions, labels, metrics = trainer.predict(predict_dataset, metric_key_prefix="predict")
-        predictions = np.argmax(predictions, axis=2)
+        if isinstance(predictions, tuple):
+            predictions = predictions[0]
 
         # Remove ignored index (special tokens)
         true_predictions = [
