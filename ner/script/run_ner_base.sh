@@ -14,7 +14,6 @@ TRAIN_FILE="$DATA_DIR/train.csv"
 VALIDATION_FILE="$DATA_DIR/dev.csv"
 TEST_FILE="$DATA_DIR/test.csv"
 
-# Run the model training and evaluation
 python run_ner.py \
     --model_name_or_path $BERT_MODEL \
     --label_names "labels" \
