@@ -15,9 +15,10 @@ import wandb
 import adapters
 import evaluate
 import transformers
-from adapters import AdapterArguments, AdapterTrainer, AutoAdapterModel, setup_adapter_training
+from adapters import AdapterArguments, AdapterTrainer, setup_adapter_training
 from transformers import (
     AutoConfig,
+    AutoModelForTokenClassification,
     AutoTokenizer,
     DataCollatorForTokenClassification,
     HfArgumentParser,
@@ -338,8 +339,7 @@ def main():
         revision=model_args.model_revision,
         token=True if model_args.token else None,
     )
-    # We use the AutoAdapterModel class here for better adapter support.
-    model = AutoAdapterModel.from_pretrained(
+    model = AutoModelForTokenClassification.from_pretrained(
         model_args.model_name_or_path,
         from_tf=bool(".ckpt" in model_args.model_name_or_path),
         config=config,
@@ -525,7 +525,9 @@ def main():
         """
         if isinstance(logits, tuple):
                 logits = logits[0]
-        return logits.argmax(dim=-1)
+
+        preds_id = logits.argmax(dim=-1)
+        return preds_id, labels
     
     # Setup adapters
     setup_adapter_training(model, adapter_args, adapter_args.adapter_name)
