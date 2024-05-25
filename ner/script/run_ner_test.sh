@@ -2,7 +2,7 @@
 BERT_MODEL="indolem/indobert-base-uncased"
 TRAIN_BATCH_SIZE=16
 EVAL_BATCH_SIZE=64
-NUM_EPOCHS=20
+NUM_EPOCHS=1
 LEARNING_RATE=5e-5
 MAX_LENGTH=128
 SEED=42
@@ -10,9 +10,9 @@ DATASET=nerui
 DATA_DIR=./data/$DATASET
 
 OUTPUT_DIR="bin/$DATASET-test"
-TRAIN_FILE="$DATA_DIR/train.csv"
-VALIDATION_FILE="$DATA_DIR/dev.csv"
-TEST_FILE="$DATA_DIR/test.csv"
+TRAIN_FILE="$DATA_DIR/train0.csv"
+VALIDATION_FILE="$DATA_DIR/dev0.csv"
+TEST_FILE="$DATA_DIR/test0.csv"
 
 python run_ner.py \
     --model_name_or_path $BERT_MODEL \
