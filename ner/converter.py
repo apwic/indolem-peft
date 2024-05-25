@@ -3,13 +3,9 @@ import pandas as pd
 import ast
 
 def convert_tsv_to_grouped_csv(directory, file_prefix, output_filename):
-    # Get the list of TSV files based on the prefix
     tsv_files = [f for f in os.listdir(directory) if f.startswith(file_prefix) and f.endswith('.tsv')]
 
-    # Initialize an empty list to hold the combined data
     data = []
-
-    # Read each TSV file and append to the combined list
     for tsv_file in tsv_files:
         file_path = os.path.join(directory, tsv_file)
         with open(file_path, 'r') as file:
@@ -33,16 +29,13 @@ def convert_tsv_to_grouped_csv(directory, file_prefix, output_filename):
                 labels.append(label)
             data.extend(zip(sentences, labels))
 
-    # Create DataFrame
     df = pd.DataFrame(data, columns=['tokens', 'ner_tags'])
     df['id'] = df.index.astype(str)
     df = df[['id', 'tokens', 'ner_tags']]
     
-    # Save the DataFrame to a CSV file
-    df.to_csv(output_filename, index=False)
+    df.to_csv(directory + output_filename, index=False)
 
-# Define the directory containing the TSV files
-directory = './data/nerugm/'
+directory = './data/nerui/'
 
 # Convert the dev, train, and test TSV files to CSV files
 convert_tsv_to_grouped_csv(directory, 'dev', 'dev.csv')
