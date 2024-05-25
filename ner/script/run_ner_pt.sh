@@ -1,5 +1,4 @@
 #!/bin/bash
-export WANDB_PROJECT="indolem-pelt-nerugm-temp"
 BERT_MODEL="indolem/indobert-base-uncased"
 TRAIN_BATCH_SIZE=16
 EVAL_BATCH_SIZE=64
@@ -7,7 +6,8 @@ NUM_EPOCHS=20
 LEARNING_RATE=5e-5
 MAX_LENGTH=128
 SEED=42
-DATA_DIR=./data/nerugm
+DATASET=nerui
+DATA_DIR=./data/$DATASET
 
 TRAIN_FILE="$DATA_DIR/train.csv"
 VALIDATION_FILE="$DATA_DIR/dev.csv"
@@ -19,7 +19,7 @@ for prefix_length in "${prefix_lengths[@]}"
 do
     echo "Training with Prefix-Tuning prefix_length=$prefix_length"
     
-    OUTPUT_DIR="bin/nerugm-pt-pl${prefix_length}"
+    OUTPUT_DIR="bin/$DATASET-pt-pl${prefix_length}"
 
     python run_ner.py \
         --model_name_or_path $BERT_MODEL \
@@ -42,14 +42,14 @@ do
         --save_total_limit 1 \
         --report_to "tensorboard" "wandb" \
         --push_to_hub \
-        --project_name "indolem-pelt-nerugm-temp" \
-        --run_name "nerugm-pt-pl${prefix_length}" \
+        --project_name "indolem-pelt-$DATASET-temp" \
+        --run_name "$DATASET-pt-pl${prefix_length}" \
         --do_train \
         --do_eval \
         --do_predict \
         --overwrite_output_dir \
         --adapter_config "prefix_tuning[prefix_length=$prefix_length]" \
-        --adapter_name "nerugm-pt" \
+        --adapter_name "$DATASET-pt" \
         --train_adapter \
 
     echo "Finished training with Prefix-Tuning prefix_length=$prefix_length"

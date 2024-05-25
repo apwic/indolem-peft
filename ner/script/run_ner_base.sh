@@ -1,5 +1,4 @@
 #!/bin/bash
-export WANDB_PROJECT="indolem-pelt-nerugm-temp"
 BERT_MODEL="indolem/indobert-base-uncased"
 TRAIN_BATCH_SIZE=16
 EVAL_BATCH_SIZE=64
@@ -7,9 +6,10 @@ NUM_EPOCHS=20
 LEARNING_RATE=5e-5
 MAX_LENGTH=128
 SEED=42
-DATA_DIR=./data/nerugm
+DATASET=nerui
+DATA_DIR=./data/$DATASET
 
-OUTPUT_DIR="bin/nerugm-base"
+OUTPUT_DIR="bin/$DATASET-base"
 TRAIN_FILE="$DATA_DIR/train.csv"
 VALIDATION_FILE="$DATA_DIR/dev.csv"
 TEST_FILE="$DATA_DIR/test.csv"
@@ -35,8 +35,8 @@ python run_ner.py \
     --save_total_limit 1 \
     --report_to "tensorboard" "wandb" \
     --push_to_hub \
-    --project_name "indolem-pelt-nerugm-temp" \
-    --run_name "nerugm-base" \
+    --project_name "indolem-pelt-$DATASET-temp" \
+    --run_name "$DATASET-base" \
     --do_train \
     --do_eval \
     --do_predict \
