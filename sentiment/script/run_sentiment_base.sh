@@ -1,5 +1,4 @@
 #!/bin/bash
-export WANDB_PROJECT="indolem-pelt-sentiment-temp"
 MAX_LENGTH=200
 BERT_MODEL="indolem/indobert-base-uncased"
 BATCH_SIZE=30
@@ -9,7 +8,7 @@ SEED=42
 
 DATA_DIR=./data
 
-for i in {1..1}
+for i in {0..4}
 do
     echo "Training on fold $i"
 

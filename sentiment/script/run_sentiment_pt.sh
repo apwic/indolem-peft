@@ -12,7 +12,7 @@ DATA_DIR=./data
 # Define hyperparameter arrays for prefix length
 declare -a prefix_lengths=("10" "20" "30")
 
-for i in {1..1}
+for i in {0..4}
 do
     for prefix_length in "${prefix_lengths[@]}"
     do

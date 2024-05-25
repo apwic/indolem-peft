@@ -9,7 +9,7 @@ SEED=42
 
 DATA_DIR=./data
 
-for i in {1..1}
+for i in {0..4}
 do
     echo "Training on fold $i with IA3"
     
