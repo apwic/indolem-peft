@@ -10,9 +10,9 @@ SEED=42
 DATA_DIR=./data
 
 # Define hyperparameter arrays
-declare -a ranks=("2" "4" "8")
+declare -a ranks=("8" "16")
 declare -a alphas=("0" "1" "2")
-declare -a dropouts=("0.05" "0.1" "0.15")
+declare -a dropouts=("0.1" "0.2")
 
 for i in {0..4}
 do
