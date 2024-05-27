@@ -2,11 +2,11 @@
 BERT_MODEL="indolem/indobert-base-uncased"
 TRAIN_BATCH_SIZE=16
 EVAL_BATCH_SIZE=64
-NUM_EPOCHS=20
+NUM_EPOCHS=100
 LEARNING_RATE=5e-5
 MAX_LENGTH=128
 SEED=42
-DATASET=nerui
+DATASET=nerugm
 DATA_DIR=./data/$DATASET
 
 TRAIN_FILE="$DATA_DIR/train.csv"
@@ -41,6 +41,7 @@ do
             --learning_rate $LEARNING_RATE \
             --max_seq_length $MAX_LENGTH \
             --seed $SEED \
+            --return_entity_level_metrics \
             --evaluation_strategy "epoch" \
             --logging_strategy "epoch" \
             --save_strategy "epoch" \

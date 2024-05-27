@@ -6,7 +6,7 @@ NUM_EPOCHS=1
 LEARNING_RATE=5e-5
 MAX_LENGTH=128
 SEED=42
-DATASET=nerui
+DATASET=nerugm
 DATA_DIR=./data/$DATASET
 
 OUTPUT_DIR="bin/$DATASET-test"
@@ -29,6 +29,7 @@ python run_ner.py \
     --learning_rate $LEARNING_RATE \
     --max_seq_length $MAX_LENGTH \
     --seed $SEED \
+    --return_entity_level_metrics \
     --evaluation_strategy "epoch" \
     --logging_strategy "epoch" \
     --save_strategy "epoch" \
