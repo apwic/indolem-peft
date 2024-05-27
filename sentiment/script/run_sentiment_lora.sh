@@ -17,7 +17,7 @@ do
     do
         echo "Training on fold $i with LoRA r=$rank"
         
-        OUTPUT_DIR="bin/sentiment-lora-r${rank}"
+        OUTPUT_DIR="bin/sentiment-lora-r${rank}-$i"
         TRAIN_FILE="$DATA_DIR/train$i.csv"
         VALIDATION_FILE="$DATA_DIR/dev$i.csv"
         TEST_FILE="$DATA_DIR/test$i.csv"
@@ -42,7 +42,7 @@ do
             --report_to "tensorboard" "wandb" \
             --push_to_hub \
             --project_name "indolem-pelt-sentiment-temp" \
-            --run_name "sentiment-lora-r${rank}" \
+            --run_name "sentiment-lora-r${rank}-$i" \
             --do_train \
             --do_eval \
             --do_predict \

@@ -21,10 +21,10 @@ do
     do
         echo "Training on fold $i with LoRA r=$rank"
 
+        OUTPUT_DIR="bin/$DATASET-lora-r${rank}-$i"
         TRAIN_FILE="$DATA_DIR/train$i.csv"
         VALIDATION_FILE="$DATA_DIR/dev$i.csv"
         TEST_FILE="$DATA_DIR/test$i.csv"
-        OUTPUT_DIR="bin/$DATASET-lora-r${rank}"
 
         python run_ner.py \
             --model_name_or_path $BERT_MODEL \
@@ -48,7 +48,7 @@ do
             --report_to "tensorboard" "wandb" \
             --push_to_hub \
             --project_name "indolem-pelt-$DATASET-temp" \
-            --run_name "$DATASET-lora-r${rank}" \
+            --run_name "$DATASET-lora-r${rank}-$i" \
             --do_train \
             --do_eval \
             --do_predict \
