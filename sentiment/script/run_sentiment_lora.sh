@@ -41,7 +41,8 @@ do
             --save_total_limit 1 \
             --report_to "tensorboard" "wandb" \
             --push_to_hub \
-            --project_name "indolem-pelt-sentiment-temp" \
+            --project_name "indolem-pelt-sentiment" \
+            --group_name "lora-r${rank}" \
             --run_name "sentiment-lora-r${rank}-$i" \
             --do_train \
             --do_eval \

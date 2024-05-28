@@ -198,6 +198,10 @@ class TrainingArguments(TrainingArguments):
     project_name: Optional[str] = field(
         default=None,
         metadata={"help": "The name of the project for wandb runs."}
+    ),
+    group_name: Optional[str] = field(
+        default=None,
+        metadata={"help": "The name of group for grouping runs in wandb. Useful for grouping experiment in K-fold"}
     )
 
 def main():
@@ -254,11 +258,10 @@ def main():
     # Initiate wandb runs manually to log results manually
     # outside of the training/evaluation loop
     # Will be initialized from Trainer, if report_to wandb
-    if training_args.project_name is not None and training_args.run_name is not None:
-        wandb.init(project=training_args.project_name,
-                   name=training_args.run_name)
     if training_args.project_name is not None:
-        wandb.init(project=training_args.project_name)
+        wandb.init(project=training_args.project_name,
+                   name=training_args.run_name,
+                   group=training_args.group_name)
 
     # Loading a dataset from local files.
     # CSV/JSON/TXT training and evaluation files are needed.

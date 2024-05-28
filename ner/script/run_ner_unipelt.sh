@@ -40,7 +40,8 @@ do
         --save_total_limit 1 \
         --report_to "tensorboard" "wandb" \
         --push_to_hub \
-        --project_name "indolem-pelt-$DATASET-temp" \
+        --project_name "indolem-pelt-$DATASET" \
+        --group_name "unipelt" \
         --run_name "$DATASET-unipelt-$i" \
         --do_train \
         --do_eval \

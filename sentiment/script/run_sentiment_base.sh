@@ -36,7 +36,8 @@ do
         --save_total_limit 1 \
         --report_to "tensorboard" "wandb" \
         --push_to_hub \
-        --project_name "indolem-pelt-sentiment-temp" \
+        --project_name "indolem-pelt-sentiment" \
+        --group_name "baseline" \
         --run_name "sentiment-base-$i" \
         --do_train \
         --do_eval \
