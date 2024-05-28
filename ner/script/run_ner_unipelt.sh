@@ -42,6 +42,7 @@ do
         --push_to_hub \
         --project_name "indolem-pelt-$DATASET" \
         --group_name "unipelt" \
+        --job_type "fold-$i" \
         --run_name "$DATASET-unipelt-$i" \
         --do_train \
         --do_eval \

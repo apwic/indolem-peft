@@ -43,6 +43,7 @@ do
             --push_to_hub \
             --project_name "indolem-pelt-sentiment" \
             --group_name "lora-r${rank}" \
+            --job_type "fold-$i" \
             --run_name "sentiment-lora-r${rank}-$i" \
             --do_train \
             --do_eval \

@@ -38,6 +38,7 @@ do
         --push_to_hub \
         --project_name "indolem-pelt-sentiment" \
         --group_name "baseline" \
+        --job_type "fold-$i" \
         --run_name "sentiment-base-$i" \
         --do_train \
         --do_eval \

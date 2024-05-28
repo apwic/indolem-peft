@@ -38,6 +38,7 @@ do
         --push_to_hub \
         --project_name "indolem-pelt-sentiment" \
         --group_name "unipelt" \
+        --job_type "fold-$i" \
         --run_name "sentiment-unipelt-$i" \
         --do_train \
         --do_eval \
