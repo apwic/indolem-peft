@@ -49,9 +49,9 @@ do
             --report_to "tensorboard" "wandb" \
             --push_to_hub \
             --project_name "indolem-pelt-$DATASET" \
-            --group_name "pt-pl${prefix-length}" \
+            --group_name "pt-pl-$prefix_length" \
             --job_type "fold-$i" \
-            --run_name "$DATASET-pt-pl${prefix_length}-$i" \
+            --run_name "$DATASET-pt-pl-$prefix_length-$i" \
             --do_train \
             --do_eval \
             --do_predict \
