@@ -12,3 +12,4 @@ torch==2.3.0
 torchvision==0.18.0
 transformers==4.39.3
 wandb==0.17.0
+nltk==3.8.1
