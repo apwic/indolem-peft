@@ -1,4 +1,3 @@
-
 #!/bin/bash
 MAX_LENGTH=200
 BERT_MODEL="indolem/indobert-base-uncased"

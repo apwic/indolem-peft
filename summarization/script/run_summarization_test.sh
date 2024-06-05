@@ -6,7 +6,7 @@ NUM_EPOCHS=5
 LEARNING_RATE=5e-5
 SEED=42
 
-DATA_DIR=./data/
+DATA_DIR=./data
 export DATASET=summarization
 
 OUTPUT_DIR="bin/$DATASET-base-$i"

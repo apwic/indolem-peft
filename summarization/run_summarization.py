@@ -14,7 +14,7 @@ import wandb
 import adapters
 import evaluate
 import transformers
-from adapters import AdapterArguments, Seq2SeqAdapterTrainer, setup_adapter_training
+from adapters import AdapterArguments, Seq2SeqAdapterTrainer, setup_adapter_training 
 from transformers import (
     AutoConfig,
     AutoModelForSeq2SeqLM,
@@ -36,7 +36,7 @@ require_version("datasets>=1.8.0", "To fix: pip install -r requirements.txt")
 warnings.filterwarnings('ignore', category=FutureWarning)
 logger = logging.getLogger(__name__)
 
-@dataclass
+@dataclass(kw_only=True)
 class DataTrainingArguments:
     """
     Arguments pertaining to what data we are going to input our model for training and eval.
@@ -167,10 +167,10 @@ class DataTrainingArguments:
         else:
             if self.train_file is not None:
                 extension = self.train_file.split(".")[-1]
-                assert extension in ["csv", "json"], "`train_file` should be a csv or a json file."
+                assert extension in ["csv", "jsonl"], "`train_file` should be a csv or a jsonl file."
             if self.validation_file is not None:
                 extension = self.validation_file.split(".")[-1]
-                assert extension in ["csv", "json"], "`validation_file` should be a csv or a json file."
+                assert extension in ["csv", "jsonl"], "`validation_file` should be a csv or a jsonl file."
 
         if self.val_max_target_length is None:
             self.val_max_target_length = self.max_target_length
@@ -220,34 +220,24 @@ class ModelArguments:
         metadata={
             "help": (
                 "Whether to automatically resize the position embeddings if `max_source_length` exceeds "
-                "the model's position embeddings."
+                "the model's position embeddngs."
             )
         },
     )
 
-@dataclass
-class AdapterArguments(AdapterArguments):
-    """
-    Extended arguments for adapter training.
-    """
-    adapter_name: Optional[str] = field(
-        default="adapter-ner",
-        metadata={"help": "The name of the adapter to be added."}
-    )
-
-@dataclass
-class TrainingArguments(TrainingArguments):
+@dataclass(kw_only=True)
+class WandbArguments:
     """
     Extended arguments for training arguments.
     """
     project_name: Optional[str] = field(
         default=None,
         metadata={"help": "The name of the project for wandb runs."}
-    ),
+    )
     group_name: Optional[str] = field(
         default=None,
         metadata={"help": "The name of group for grouping runs in wandb. Useful for grouping experiment in K-fold"}
-    ),
+    )
     job_type: Optional[str] = field(
         default=None,
         metadata={"help": "The name of job type for grouping runs in wandb. Useful for grouping experiment in K-fold"}
@@ -255,16 +245,16 @@ class TrainingArguments(TrainingArguments):
 
 
 def main():
-    parser = HfArgumentParser((ModelArguments, DataTrainingArguments, TrainingArguments, AdapterArguments))
+    parser = HfArgumentParser([ModelArguments, DataTrainingArguments, TrainingArguments, AdapterArguments, WandbArguments])
 
     if len(sys.argv) == 2 and sys.argv[1].endswith(".json"):
         # If we pass only one argument to the script and it's the path to a json file,
         # let's parse it to get our arguments.
-        model_args, data_args, training_args, adapter_args = parser.parse_json_file(
+        model_args, data_args, training_args, adapter_args, wandb_args = parser.parse_json_file(
             json_file=os.path.abspath(sys.argv[1])
         )
     else:
-        model_args, data_args, training_args, adapter_args = parser.parse_args_into_dataclasses()
+        model_args, data_args, training_args, adapter_args, wandb_args = parser.parse_args_into_dataclasses()
 
     # Setup logging
     logging.basicConfig(
@@ -308,14 +298,14 @@ def main():
     # Initiate wandb runs manually to log results manually
     # outside of the training/evaluation loop
     # Will be initialized from Trainer, if report_to wandb
-    if training_args.project_name is not None:
-        if training_args.group_name is not None and training_args.job_type is not None:
-            wandb.init(project=training_args.project_name,
+    if wandb_args.project_name is not None:
+        if wandb_args.group_name is not None and wandb_args.job_type is not None:
+            wandb.init(project=wandb_args.project_name,
                         name=training_args.run_name,
-                        group=training_args.group_name,
-                        job_type=training_args.job_type)
+                        group=wandb_args.group_name,
+                        job_type=wandb_args.job_type)
         else:
-            wandb.init(project=training_args.project_name,
+            wandb.init(project=wandb_args.project_name,
                         name=training_args.run_name)
 
     # Loading a dataset from local files.
@@ -329,6 +319,8 @@ def main():
     if data_args.test_file is not None:
         data_files["test"] = data_args.test_file
         extension = data_args.test_file.split(".")[-1]
+    if extension == "jsonl":
+        extension = "json"
     raw_datasets = load_dataset(
         extension,
         data_files=data_files,
@@ -350,6 +342,7 @@ def main():
         revision=model_args.model_revision,
         token=True if model_args.token else None,
     )
+    #TODO: Add for BERT
     model = AutoModelForSeq2SeqLM.from_pretrained(
         model_args.model_name_or_path,
         from_tf=bool(".ckpt" in model_args.model_name_or_path),
@@ -562,7 +555,7 @@ def main():
         training_args.load_best_model_at_end = True
 
     # Setup adapters
-    setup_adapter_training(model, adapter_args, data_args.dataset_name or "summarization")
+    setup_adapter_training(model, adapter_args, "adapter-summarization")
     # Initialize our Trainer
     trainer_class = Seq2SeqAdapterTrainer if adapter_args.train_adapter else Seq2SeqTrainer
     trainer = trainer_class(

@@ -1,6 +1,5 @@
 import logging
 import os
-import random
 import sys
 import warnings
 import ast
@@ -8,7 +7,6 @@ from dataclasses import dataclass, field
 from typing import Optional
 
 import datasets
-import numpy as np
 from datasets import load_dataset, ClassLabel
 
 import wandb
@@ -68,7 +66,7 @@ class DataTrainingArguments:
         default=None,
         metadata={"help": "The number of processes to use for the preprocessing."},
     )
-    max_seq_length: int = field(
+    max_seq_length: Optional[int]= field(
         default=None,
         metadata={
             "help": (
@@ -180,45 +178,37 @@ class ModelArguments:
         metadata={"help": "Will enable to load a pretrained model whose head dimensions are different."},
     )
 
-@dataclass
-class AdapterArguments(AdapterArguments):
-    """
-    Extended arguments for adapter training.
-    """
-    adapter_name: Optional[str] = field(
-        default="adapter-ner",
-        metadata={"help": "The name of the adapter to be added."}
-    )
 
-@dataclass
-class TrainingArguments(TrainingArguments):
+@dataclass(kw_only=True)
+class WandbArguments:
     """
     Extended arguments for training arguments.
     """
     project_name: Optional[str] = field(
         default=None,
         metadata={"help": "The name of the project for wandb runs."}
-    ),
+    )
     group_name: Optional[str] = field(
         default=None,
         metadata={"help": "The name of group for grouping runs in wandb. Useful for grouping experiment in K-fold"}
-    ),
+    )
     job_type: Optional[str] = field(
         default=None,
         metadata={"help": "The name of job type for grouping runs in wandb. Useful for grouping experiment in K-fold"}
     )
 
+
 def main():
-    parser = HfArgumentParser((ModelArguments, DataTrainingArguments, TrainingArguments, AdapterArguments))
+    parser = HfArgumentParser([ModelArguments, DataTrainingArguments, TrainingArguments, AdapterArguments, WandbArguments])
 
     if len(sys.argv) == 2 and sys.argv[1].endswith(".json"):
         # If we pass only one argument to the script and it's the path to a json file,
         # let's parse it to get our arguments.
-        model_args, data_args, training_args, adapter_args = parser.parse_json_file(
+        model_args, data_args, training_args, adapter_args, wandb_args = parser.parse_json_file(
             json_file=os.path.abspath(sys.argv[1])
         )
     else:
-        model_args, data_args, training_args, adapter_args = parser.parse_args_into_dataclasses()
+        model_args, data_args, training_args, adapter_args, wandb_args = parser.parse_args_into_dataclasses()
 
     # Setup logging
     logging.basicConfig(
@@ -262,14 +252,14 @@ def main():
     # Initiate wandb runs manually to log results manually
     # outside of the training/evaluation loop
     # Will be initialized from Trainer, if report_to wandb
-    if training_args.project_name is not None:
-        if training_args.group_name is not None and training_args.job_type is not None:
-            wandb.init(project=training_args.project_name,
+    if wandb_args.project_name is not None:
+        if wandb_args.group_name is not None and wandb_args.job_type is not None:
+            wandb.init(project=wandb_args.project_name,
                         name=training_args.run_name,
-                        group=training_args.group_name,
-                        job_type=training_args.job_type)
+                        group=wandb_args.group_name,
+                        job_type=wandb_args.job_type)
         else:
-            wandb.init(project=training_args.project_name,
+            wandb.init(project=wandb_args.project_name,
                         name=training_args.run_name)
 
     # Loading a dataset from local files.
@@ -542,7 +532,7 @@ def main():
         return preds_id, labels
     
     # Setup adapters
-    setup_adapter_training(model, adapter_args, adapter_args.adapter_name)
+    setup_adapter_training(model, adapter_args, "adapter-ner")
     # Initialize our Trainer
     trainer_class = AdapterTrainer if adapter_args.train_adapter else Trainer
     trainer = trainer_class(
