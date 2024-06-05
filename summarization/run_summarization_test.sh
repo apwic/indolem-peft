@@ -20,29 +20,29 @@ do
     TEST_FILE="$DATA_DIR/test.0$i.jsonl"
 
     python run_ner.py \
-        --model_name_or_path $BERT_MODEL \
-	--text_column "tokens" \
-        --summary_column "ner_tags" \
-        --output_dir $OUTPUT_DIR \
-        --train_file $TRAIN_FILE \
-        --validation_file $VALIDATION_FILE \
-        --test_file $TEST_FILE \
-        --num_train_epochs $NUM_EPOCHS \
-        --per_device_train_batch_size $TRAIN_BATCH_SIZE \
-        --per_device_eval_batch_size $EVAL_BATCH_SIZE \
-        --learning_rate $LEARNING_RATE \
-        --max_seq_length $MAX_LENGTH \
-        --seed $SEED \
-        --return_entity_level_metrics \
-        --evaluation_strategy "epoch" \
-        --logging_strategy "epoch" \
-        --save_strategy "epoch" \
-        --save_total_limit 1 \
-        --report_to "none" \
-        --do_train \
-        --do_eval \
-        --do_predict \
-        --overwrite_output_dir
+		--model_name_or_path $BERT_MODEL \
+		--text_column "paragraphs" \
+		--summary_column "summary" \
+		--output_dir $OUTPUT_DIR \
+		--train_file $TRAIN_FILE \
+		--validation_file $VALIDATION_FILE \
+		--test_file $TEST_FILE \
+		--num_train_epochs $NUM_EPOCHS \
+		--per_device_train_batch_size $TRAIN_BATCH_SIZE \
+		--per_device_eval_batch_size $EVAL_BATCH_SIZE \
+		--learning_rate $LEARNING_RATE \
+		--max_seq_length $MAX_LENGTH \
+		--seed $SEED \
+		--return_entity_level_metrics \
+		--evaluation_strategy "epoch" \
+		--logging_strategy "epoch" \
+		--save_strategy "epoch" \
+		--save_total_limit 1 \
+		--report_to "none" \
+		--do_train \
+		--do_eval \
+		--do_predict \
+		--overwrite_output_dir
 
     echo "Finished training on fold $i"
 done

@@ -1,4 +1,4 @@
-#u/bin/bash
+#!/bin/bash
 export DATASET=nerugm
 source ./script/run_ner_base.sh
 source ./script/run_ner_lora.sh
