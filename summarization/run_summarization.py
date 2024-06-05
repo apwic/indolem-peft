@@ -43,7 +43,8 @@ class DataTrainingArguments:
     """
 
     train_file: Optional[str] = field(
-        default=None, metadata={"help": "The input training data file (a csv or jsonline file)."}
+        default=None,
+        metadata={"help": "The input training data file (a csv or jsonline file)."}
     )
     validation_file: Optional[str] = field(
         default=None,
@@ -53,11 +54,13 @@ class DataTrainingArguments:
         default=None,
         metadata={"help": "An optional input test data file to predict on (a csv or jsonline file)."},
     )
-    text_column_name: Optional[str] = field(
-        default=None, metadata={"help": "The column name of text to input in the file (a csv or jsonline file)."}
+    text_column: Optional[str] = field(
+        default=None,
+        metadata={"help": "The name of the column in the datasets containing the full texts (for summarization)."},
     )
-    label_column_name: Optional[str] = field(
-        default=None, metadata={"help": "The column name of label to input in the file (a csv or jsonline file)."}
+    summary_column: Optional[str] = field(
+        default=None,
+        metadata={"help": "The name of the column in the datasets containing the summaries (for summarization)."},
     )
     overwrite_cache: bool = field(
         default=False, metadata={"help": "Overwrite the cached training and evaluation sets"}
@@ -138,10 +141,6 @@ class DataTrainingArguments:
             "help": "Whether to ignore the tokens corresponding to padded labels in the loss computation or not."
         },
     )
-    source_prefix: Optional[str] = field(
-        default="", metadata={"help": "A prefix to add before every source text (useful for T5 models)."}
-    )
-
     forced_bos_token: Optional[str] = field(
         default=None,
         metadata={
