@@ -19,7 +19,7 @@ do
     VALIDATION_FILE="$DATA_DIR/dev.0$i.jsonl"
     TEST_FILE="$DATA_DIR/test.0$i.jsonl"
 
-    python run_ner.py \
+    python run_summarization.py \
 		--model_name_or_path $BERT_MODEL \
 		--text_column "paragraphs" \
 		--summary_column "summary" \
