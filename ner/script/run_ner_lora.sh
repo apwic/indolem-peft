@@ -57,7 +57,6 @@ do
             --do_predict \
             --overwrite_output_dir \
             --adapter_config "lora[r=$rank]" \
-            --adapter_name "$DATASET-lora" \
             --train_adapter \
 
         echo "Finished training on fold $i with LoRA r=$rank"

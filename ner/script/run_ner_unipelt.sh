@@ -49,7 +49,6 @@ do
         --do_predict \
         --overwrite_output_dir \
         --adapter_config "unipelt" \
-        --adapter_name "$DATASET-unipelt" \
         --train_adapter \
 
     echo "Finished training on fold $i with UniPELT"

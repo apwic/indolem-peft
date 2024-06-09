@@ -57,7 +57,6 @@ do
             --do_predict \
             --overwrite_output_dir \
             --adapter_config "prefix_tuning[prefix_length=$prefix_length]" \
-            --adapter_name "$DATASET-pt" \
             --train_adapter \
 
         echo "Finished training on fold $i with Prefix-Tuning prefix_length=$prefix_length"

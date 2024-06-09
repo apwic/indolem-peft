@@ -49,7 +49,6 @@ do
         --do_predict \
         --overwrite_output_dir \
         --adapter_config "seq_bn" \
-        --adapter_name "$DATASET-seq_bn" \
         --train_adapter \
 
     echo "Finished training on fold $i with Seq Bottleneck (Adapter)"
