@@ -6,14 +6,19 @@ import warnings
 from dataclasses import dataclass, field
 from typing import Optional
 
+import adapters
 import datasets
 import numpy as np
-from datasets import load_dataset
-
-import wandb
-import adapters
 import transformers
-from adapters import AdapterArguments, AdapterTrainer, AutoAdapterModel, setup_adapter_training
+import wandb
+from adapters import (
+    AdapterArguments,
+    AdapterTrainer,
+    AutoAdapterModel,
+    setup_adapter_training,
+)
+from datasets import load_dataset
+from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 from transformers import (
     AutoConfig,
     AutoTokenizer,
@@ -25,7 +30,6 @@ from transformers import (
     default_data_collator,
     set_seed,
 )
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from transformers.trainer_utils import get_last_checkpoint
 from transformers.utils import check_min_version
 from transformers.utils.versions import require_version
@@ -33,8 +37,9 @@ from transformers.utils.versions import require_version
 # Will error if the minimal version of Transformers is not installed. Remove at your own risks.
 check_min_version("4.26.0")
 require_version("datasets>=1.8.0", "To fix: pip install -r requirements.txt")
-warnings.filterwarnings('ignore', category=FutureWarning)
+warnings.filterwarnings("ignore", category=FutureWarning)
 logger = logging.getLogger(__name__)
+
 
 @dataclass(kw_only=True)
 class DataTrainingArguments:
@@ -56,7 +61,8 @@ class DataTrainingArguments:
         },
     )
     overwrite_cache: bool = field(
-        default=False, metadata={"help": "Overwrite the cached preprocessed datasets or not."}
+        default=False,
+        metadata={"help": "Overwrite the cached preprocessed datasets or not."},
     )
     pad_to_max_length: bool = field(
         default=True,
@@ -95,23 +101,32 @@ class DataTrainingArguments:
         },
     )
     train_file: Optional[str] = field(
-        default=None, metadata={"help": "A csv or a json file containing the training data."}
+        default=None,
+        metadata={"help": "A csv or a json file containing the training data."},
     )
     validation_file: Optional[str] = field(
-        default=None, metadata={"help": "A csv or a json file containing the validation data."}
+        default=None,
+        metadata={"help": "A csv or a json file containing the validation data."},
     )
-    test_file: Optional[str] = field(default=None, metadata={"help": "A csv or a json file containing the test data."})
+    test_file: Optional[str] = field(
+        default=None,
+        metadata={"help": "A csv or a json file containing the test data."},
+    )
 
     def __post_init__(self):
         if self.train_file is None and self.validation_file is None:
             raise ValueError("Need a training and validation file.")
         else:
             train_extension = self.train_file.split(".")[-1]
-            assert train_extension in ["csv", "json"], "`train_file` should be a csv or a json file."
+            assert train_extension in [
+                "csv",
+                "json",
+            ], "`train_file` should be a csv or a json file."
             validation_extension = self.validation_file.split(".")[-1]
             assert (
                 validation_extension == train_extension
             ), "`validation_file` should have the same extension (csv or json) as `train_file`."
+
 
 @dataclass
 class ModelArguments:
@@ -120,25 +135,39 @@ class ModelArguments:
     """
 
     model_name_or_path: str = field(
-        metadata={"help": "Path to pretrained model or model identifier from huggingface.co/models"}
+        metadata={
+            "help": "Path to pretrained model or model identifier from huggingface.co/models"
+        }
     )
     config_name: Optional[str] = field(
-        default=None, metadata={"help": "Pretrained config name or path if not the same as model_name"}
+        default=None,
+        metadata={
+            "help": "Pretrained config name or path if not the same as model_name"
+        },
     )
     tokenizer_name: Optional[str] = field(
-        default=None, metadata={"help": "Pretrained tokenizer name or path if not the same as model_name"}
+        default=None,
+        metadata={
+            "help": "Pretrained tokenizer name or path if not the same as model_name"
+        },
     )
     cache_dir: Optional[str] = field(
         default=None,
-        metadata={"help": "Where do you want to store the pretrained models downloaded from huggingface.co"},
+        metadata={
+            "help": "Where do you want to store the pretrained models downloaded from huggingface.co"
+        },
     )
     use_fast_tokenizer: bool = field(
         default=True,
-        metadata={"help": "Whether to use one of the fast tokenizer (backed by the tokenizers library) or not."},
+        metadata={
+            "help": "Whether to use one of the fast tokenizer (backed by the tokenizers library) or not."
+        },
     )
     model_revision: str = field(
         default="main",
-        metadata={"help": "The specific model version to use (can be a branch name, tag name or commit id)."},
+        metadata={
+            "help": "The specific model version to use (can be a branch name, tag name or commit id)."
+        },
     )
     token: bool = field(
         default=False,
@@ -151,7 +180,9 @@ class ModelArguments:
     )
     ignore_mismatched_sizes: bool = field(
         default=False,
-        metadata={"help": "Will enable to load a pretrained model whose head dimensions are different."},
+        metadata={
+            "help": "Will enable to load a pretrained model whose head dimensions are different."
+        },
     )
 
 
@@ -160,31 +191,45 @@ class WandbArguments:
     """
     Extended arguments for training arguments.
     """
+
     project_name: Optional[str] = field(
-        default=None,
-        metadata={"help": "The name of the project for wandb runs."}
+        default=None, metadata={"help": "The name of the project for wandb runs."}
     )
     group_name: Optional[str] = field(
         default=None,
-        metadata={"help": "The name of group for grouping runs in wandb. Useful for grouping experiment in K-fold"}
+        metadata={
+            "help": "The name of group for grouping runs in wandb. Useful for grouping experiment in K-fold"
+        },
     )
     job_type: Optional[str] = field(
         default=None,
-        metadata={"help": "The name of job type for grouping runs in wandb. Useful for grouping experiment in K-fold"}
+        metadata={
+            "help": "The name of job type for grouping runs in wandb. Useful for grouping experiment in K-fold"
+        },
     )
 
 
 def main():
-    parser = HfArgumentParser([ModelArguments, DataTrainingArguments, TrainingArguments, AdapterArguments, WandbArguments])
+    parser = HfArgumentParser(
+        [
+            ModelArguments,
+            DataTrainingArguments,
+            TrainingArguments,
+            AdapterArguments,
+            WandbArguments,
+        ]
+    )
 
     if len(sys.argv) == 2 and sys.argv[1].endswith(".json"):
         # If we pass only one argument to the script and it's the path to a json file,
         # let's parse it to get our arguments.
-        model_args, data_args, training_args, adapter_args, wandb_args = parser.parse_json_file(
-            json_file=os.path.abspath(sys.argv[1])
+        model_args, data_args, training_args, adapter_args, wandb_args = (
+            parser.parse_json_file(json_file=os.path.abspath(sys.argv[1]))
         )
     else:
-        model_args, data_args, training_args, adapter_args, wandb_args = parser.parse_args_into_dataclasses()
+        model_args, data_args, training_args, adapter_args, wandb_args = (
+            parser.parse_args_into_dataclasses()
+        )
 
     # Setup logging
     logging.basicConfig(
@@ -209,14 +254,20 @@ def main():
 
     # Detecting last checkpoint.
     last_checkpoint = None
-    if os.path.isdir(training_args.output_dir) and training_args.do_train and not training_args.overwrite_output_dir:
+    if (
+        os.path.isdir(training_args.output_dir)
+        and training_args.do_train
+        and not training_args.overwrite_output_dir
+    ):
         last_checkpoint = get_last_checkpoint(training_args.output_dir)
         if last_checkpoint is None and len(os.listdir(training_args.output_dir)) > 0:
             raise ValueError(
                 f"Output directory ({training_args.output_dir}) already exists and is not empty. "
                 "Use --overwrite_output_dir to overcome."
             )
-        elif last_checkpoint is not None and training_args.resume_from_checkpoint is None:
+        elif (
+            last_checkpoint is not None and training_args.resume_from_checkpoint is None
+        ):
             logger.info(
                 f"Checkpoint detected, resuming training at {last_checkpoint}. To avoid this behavior, change "
                 "the `--output_dir` or add `--overwrite_output_dir` to train from scratch."
@@ -230,17 +281,21 @@ def main():
     # Will be initialized from Trainer, if report_to wandb
     if wandb_args.project_name is not None:
         if wandb_args.group_name is not None and wandb_args.job_type is not None:
-            wandb.init(project=wandb_args.project_name,
-                        name=training_args.run_name,
-                        group=wandb_args.group_name,
-                        job_type=wandb_args.job_type)
+            wandb.init(
+                project=wandb_args.project_name,
+                name=training_args.run_name,
+                group=wandb_args.group_name,
+                job_type=wandb_args.job_type,
+            )
         else:
-            wandb.init(project=wandb_args.project_name,
-                        name=training_args.run_name)
+            wandb.init(project=wandb_args.project_name, name=training_args.run_name)
 
     # Loading a dataset from local files.
     # CSV/JSON training and evaluation files are needed.
-    data_files = {"train": data_args.train_file, "validation": data_args.validation_file}
+    data_files = {
+        "train": data_args.train_file,
+        "validation": data_args.validation_file,
+    }
 
     # Get the test dataset: you can provide your own CSV/JSON test file (see below)
     if training_args.do_predict:
@@ -286,14 +341,22 @@ def main():
     # In distributed training, the .from_pretrained methods guarantee that only one local process can concurrently
     # download model & vocab.
     config = AutoConfig.from_pretrained(
-        model_args.config_name if model_args.config_name else model_args.model_name_or_path,
+        (
+            model_args.config_name
+            if model_args.config_name
+            else model_args.model_name_or_path
+        ),
         num_labels=num_labels,
         cache_dir=model_args.cache_dir,
         revision=model_args.model_revision,
         token=True if model_args.token else None,
     )
     tokenizer = AutoTokenizer.from_pretrained(
-        model_args.tokenizer_name if model_args.tokenizer_name else model_args.model_name_or_path,
+        (
+            model_args.tokenizer_name
+            if model_args.tokenizer_name
+            else model_args.model_name_or_path
+        ),
         cache_dir=model_args.cache_dir,
         use_fast=model_args.use_fast_tokenizer,
         revision=model_args.model_revision,
@@ -320,7 +383,9 @@ def main():
     )
 
     # Preprocessing the raw_datasets
-    non_label_column_names = [name for name in raw_datasets["train"].column_names if name != "labels"]
+    non_label_column_names = [
+        name for name in raw_datasets["train"].column_names if name != "labels"
+    ]
     if "sentence1" in non_label_column_names and "sentence2" in non_label_column_names:
         sentence1_key, sentence2_key = "sentence1", "sentence2"
     else:
@@ -348,7 +413,11 @@ def main():
 
         # Adjusting label ID mapping
         if label_list and isinstance(label_list[0], str):
-            label_to_id = {label_name_to_id[label.lower()]: i for i, label in enumerate(label_list) if label.lower() in label_name_to_id}
+            label_to_id = {
+                label_name_to_id[label.lower()]: i
+                for i, label in enumerate(label_list)
+                if label.lower() in label_name_to_id
+            }
         else:
             # Assuming label_list is already in the correct integer form or does not need conversion
             label_to_id = {label: i for i, label in enumerate(label_list)}
@@ -367,13 +436,19 @@ def main():
     def preprocess_function(examples):
         # Tokenize the texts
         args = (
-            (examples[sentence1_key],) if sentence2_key is None else (examples[sentence1_key], examples[sentence2_key])
+            (examples[sentence1_key],)
+            if sentence2_key is None
+            else (examples[sentence1_key], examples[sentence2_key])
         )
-        result = tokenizer(*args, padding=padding, max_length=max_seq_length, truncation=True)
+        result = tokenizer(
+            *args, padding=padding, max_length=max_seq_length, truncation=True
+        )
 
         # Map labels to IDs
         if label_to_id is not None and "labels" in examples:
-            result["labels"] = [(label_to_id[l] if l != -1 else -1) for l in examples["labels"]]
+            result["labels"] = [
+                (label_to_id[l] if l != -1 else -1) for l in examples["labels"]
+            ]
         return result
 
     with training_args.main_process_first(desc="dataset map pre-processing"):
@@ -393,7 +468,10 @@ def main():
             train_dataset = train_dataset.select(range(max_train_samples))
 
     if training_args.do_eval:
-        if "validation" not in raw_datasets and "validation_matched" not in raw_datasets:
+        if (
+            "validation" not in raw_datasets
+            and "validation_matched" not in raw_datasets
+        ):
             raise ValueError("--do_eval requires a validation dataset")
         eval_dataset = raw_datasets["validation"]
         if data_args.max_eval_samples is not None:
@@ -405,7 +483,9 @@ def main():
             raise ValueError("--do_predict requires a test dataset")
         predict_dataset = raw_datasets["test"]
         if data_args.max_predict_samples is not None:
-            max_predict_samples = min(len(predict_dataset), data_args.max_predict_samples)
+            max_predict_samples = min(
+                len(predict_dataset), data_args.max_predict_samples
+            )
             predict_dataset = predict_dataset.select(range(max_predict_samples))
 
     # Log a few random samples from the training set:
@@ -420,9 +500,9 @@ def main():
 
         return {
             "accuracy": accuracy_score(labels, predictions),
-            "precision": precision_score(labels, predictions, average='macro'),
-            "recall": recall_score(labels, predictions, average='macro'),
-            "f1": f1_score(labels, predictions, average='macro'),
+            "precision": precision_score(labels, predictions, average="macro"),
+            "recall": recall_score(labels, predictions, average="macro"),
+            "f1": f1_score(labels, predictions, average="macro"),
         }
 
     # Data collator will default to DataCollatorWithPadding when the tokenizer is passed to Trainer, so we change it if
@@ -461,7 +541,9 @@ def main():
         train_result = trainer.train(resume_from_checkpoint=checkpoint)
         metrics = train_result.metrics
         max_train_samples = (
-            data_args.max_train_samples if data_args.max_train_samples is not None else len(train_dataset)
+            data_args.max_train_samples
+            if data_args.max_train_samples is not None
+            else len(train_dataset)
         )
         metrics["train_samples"] = min(max_train_samples, len(train_dataset))
 
@@ -480,7 +562,9 @@ def main():
             metrics = trainer.evaluate(eval_dataset=eval_dataset)
 
             max_eval_samples = (
-                data_args.max_eval_samples if data_args.max_eval_samples is not None else len(eval_dataset)
+                data_args.max_eval_samples
+                if data_args.max_eval_samples is not None
+                else len(eval_dataset)
             )
             metrics["eval_samples"] = min(max_eval_samples, len(eval_dataset))
 
@@ -494,10 +578,14 @@ def main():
 
         for predict_dataset in predict_datasets:
             # Removing the `label` columns because it contains -1 and Trainer won't like that.
-            labels= predict_dataset["labels"]
+            labels = predict_dataset["labels"]
             predict_dataset = predict_dataset.remove_columns("labels")
-            predictions = trainer.predict(predict_dataset, metric_key_prefix="predict").predictions
-            metrics = compute_metrics(EvalPrediction(predictions=predictions, label_ids=labels))
+            predictions = trainer.predict(
+                predict_dataset, metric_key_prefix="predict"
+            ).predictions
+            metrics = compute_metrics(
+                EvalPrediction(predictions=predictions, label_ids=labels)
+            )
             predictions = np.argmax(predictions, axis=1)
 
             trainer.log_metrics("predict", metrics)
@@ -506,21 +594,28 @@ def main():
             if training_args.project_name is not None:
                 wandb.log(metrics)
 
-            output_predict_file = os.path.join(training_args.output_dir, f"predict_results.txt")
+            output_predict_file = os.path.join(
+                training_args.output_dir, f"predict_results.txt"
+            )
             if trainer.is_world_process_zero():
                 with open(output_predict_file, "w") as writer:
                     logger.info(f"***** Predict results *****")
                     writer.write("index\tprediction\n")
                     for index, item in enumerate(predictions):
-                            item = label_list[item]
-                            writer.write(f"{index}\t{item}\n")
+                        item = label_list[item]
+                        writer.write(f"{index}\t{item}\n")
 
-    kwargs = {"finetuned_from": model_args.model_name_or_path, "tasks": "sentiment", "language": "id"}
+    kwargs = {
+        "finetuned_from": model_args.model_name_or_path,
+        "tasks": "sentiment",
+        "language": "id",
+    }
 
     if training_args.push_to_hub:
         trainer.push_to_hub(**kwargs)
     else:
         trainer.create_model_card(**kwargs)
+
 
 def _mp_fn(index):
     # For xla_spawn (TPUs)
