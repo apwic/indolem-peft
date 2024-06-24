@@ -1,5 +1,5 @@
 #!/bin/bash
-BERT_MODEL="indolem/indobert-base-uncased"
+MODEL="indolem/indobert-base-uncased"
 TRAIN_BATCH_SIZE=16
 EVAL_BATCH_SIZE=64
 NUM_EPOCHS=5
@@ -19,7 +19,7 @@ do
     TEST_FILE="$DATA_DIR/test$i.csv"
 
     python run_ner.py \
-        --model_name_or_path $BERT_MODEL \
+        --model_name_or_path $MODEL \
         --label_names "labels" \
         --text_column_name "tokens" \
         --label_column_name "ner_tags" \

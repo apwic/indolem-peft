@@ -1,6 +1,6 @@
 #!/bin/bash
 MAX_LENGTH=200
-BERT_MODEL="indolem/indobert-base-uncased"
+MODEL="indolem/indobert-base-uncased"
 BATCH_SIZE=30
 NUM_EPOCHS=20
 LEARNING_RATE=5e-5
@@ -24,7 +24,7 @@ do
         
         # Run the model training and evaluation
         python run_sentiment.py \
-            --model_name_or_path $BERT_MODEL \
+            --model_name_or_path $MODEL \
             --label_names "labels" \
             --output_dir $OUTPUT_DIR \
             --train_file $TRAIN_FILE \

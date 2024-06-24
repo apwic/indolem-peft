@@ -12,19 +12,13 @@ import nltk
 import numpy as np
 import transformers
 import wandb
-from adapters import AdapterArguments, Seq2SeqAdapterTrainer, setup_adapter_training
+from adapters import (AdapterArguments, Seq2SeqAdapterTrainer,
+                      setup_adapter_training)
 from datasets import load_dataset
-from transformers import (
-    AutoConfig,
-    AutoModelForSeq2SeqLM,
-    AutoTokenizer,
-    DataCollatorForSeq2Seq,
-    EarlyStoppingCallback,
-    HfArgumentParser,
-    Seq2SeqTrainer,
-    TrainingArguments,
-    set_seed,
-)
+from transformers import (AutoConfig, AutoModelForSeq2SeqLM, AutoTokenizer,
+                          DataCollatorForSeq2Seq, EarlyStoppingCallback,
+                          HfArgumentParser, Seq2SeqTrainer, TrainingArguments,
+                          set_seed)
 from transformers.trainer_utils import get_last_checkpoint
 from transformers.utils import check_min_version
 from transformers.utils.versions import require_version
