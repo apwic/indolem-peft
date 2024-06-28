@@ -12,14 +12,20 @@ import nltk
 import numpy as np
 import transformers
 import wandb
-from adapters import (AdapterArguments, Seq2SeqAdapterTrainer,
-                      setup_adapter_training)
+from adapters import AdapterArguments, Seq2SeqAdapterTrainer, setup_adapter_training
 from datasets import load_dataset
 from indobenchmark.tokenization_indonlg import IndoNLGTokenizer
-from transformers import (AutoConfig, AutoModelForSeq2SeqLM, AutoTokenizer,
-                          DataCollatorForSeq2Seq, EarlyStoppingCallback,
-                          HfArgumentParser, Seq2SeqTrainer, TrainingArguments,
-                          set_seed)
+from transformers import (
+    AutoConfig,
+    AutoModelForSeq2SeqLM,
+    AutoTokenizer,
+    DataCollatorForSeq2Seq,
+    EarlyStoppingCallback,
+    HfArgumentParser,
+    Seq2SeqTrainer,
+    Seq2SeqTrainingArguments,
+    set_seed,
+)
 from transformers.trainer_utils import get_last_checkpoint
 from transformers.utils import check_min_version
 from transformers.utils.versions import require_version
@@ -312,7 +318,7 @@ def main():
         [
             ModelArguments,
             DataTrainingArguments,
-            TrainingArguments,
+            Seq2SeqTrainingArguments,
             AdapterArguments,
             WandbArguments,
         ]
@@ -735,9 +741,7 @@ def main():
         eval_dataset=eval_dataset if training_args.do_eval else None,
         tokenizer=tokenizer,
         data_collator=data_collator,
-        compute_metrics=(
-            compute_metrics if training_args.predict_with_generate else None
-        ),
+        compute_metrics=compute_metrics,
     )
     if data_args.patience and data_args.patience > 0:
         callback = EarlyStoppingCallback(early_stopping_patience=data_args.patience)
@@ -812,18 +816,17 @@ def main():
         trainer.save_metrics("predict", metrics)
 
         if trainer.is_world_process_zero():
-            if training_args.predict_with_generate:
-                predictions = tokenizer.batch_decode(
-                    predict_results.predictions,
-                    skip_special_tokens=True,
-                    clean_up_tokenization_spaces=True,
-                )
-                predictions = [pred.strip() for pred in predictions]
-                output_prediction_file = os.path.join(
-                    training_args.output_dir, "generated_predictions.txt"
-                )
-                with open(output_prediction_file, "w") as writer:
-                    writer.write("\n".join(predictions))
+            predictions = tokenizer.batch_decode(
+                predict_results.predictions,
+                skip_special_tokens=True,
+                clean_up_tokenization_spaces=True,
+            )
+            predictions = [pred.strip() for pred in predictions]
+            output_prediction_file = os.path.join(
+                training_args.output_dir, "generated_predictions.txt"
+            )
+            with open(output_prediction_file, "w") as writer:
+                writer.write("\n".join(predictions))
 
     kwargs = {
         "finetuned_from": model_args.model_name_or_path,
