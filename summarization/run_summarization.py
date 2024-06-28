@@ -37,6 +37,16 @@ class DataTrainingArguments:
     Arguments pertaining to what data we are going to input our model for training and eval.
     """
 
+    dataset_name: Optional[str] = field(
+        default=None,
+        metadata={"help": "The name of the dataset to use (via the datasets library)."},
+    )
+    dataset_config_name: Optional[str] = field(
+        default=None,
+        metadata={
+            "help": "The configuration name of the dataset to use (via the datasets library)."
+        },
+    )
     train_file: Optional[str] = field(
         default=None,
         metadata={"help": "The input training data file (a csv or jsonline file)."},
@@ -130,6 +140,15 @@ class DataTrainingArguments:
             )
         },
     )
+    max_predict_samples: Optional[int] = field(
+        default=None,
+        metadata={
+            "help": (
+                "For debugging purposes or quicker training, truncate the number of prediction examples to this "
+                "value if set."
+            )
+        },
+    )
     num_beams: Optional[int] = field(
         default=None,
         metadata={
@@ -166,21 +185,28 @@ class DataTrainingArguments:
     )
 
     def __post_init__(self):
-        if self.train_file is None and self.validation_file is None:
-            raise ValueError("Need a training/validation file.")
+        if (
+            self.dataset_name is None
+            and self.train_file is None
+            and self.validation_file is None
+        ):
+            raise ValueError(
+                "Need either a dataset name or a training/validation file."
+            )
         else:
             if self.train_file is not None:
                 extension = self.train_file.split(".")[-1]
                 assert extension in [
                     "csv",
+                    "json",
                     "jsonl",
-                ], "`train_file` should be a csv or a jsonl file."
+                ], "`train_file` should be a csv, json or a jsonl file."
             if self.validation_file is not None:
                 extension = self.validation_file.split(".")[-1]
                 assert extension in [
                     "csv",
                     "jsonl",
-                ], "`validation_file` should be a csv or a jsonl file."
+                ], "`validation_file` should be a csv, json or a jsonl file."
 
         if self.val_max_target_length is None:
             self.val_max_target_length = self.max_target_length
@@ -276,6 +302,11 @@ class WandbArguments:
     )
 
 
+summarization_name_mapping = {
+    "indosum": ("paragraphs", "summary"),
+}
+
+
 def main():
     parser = HfArgumentParser(
         [
@@ -358,26 +389,40 @@ def main():
             wandb.init(project=wandb_args.project_name, name=training_args.run_name)
 
     # Loading a dataset from local files.
-    data_files = {}
-    if data_args.train_file is not None:
-        data_files["train"] = data_args.train_file
-        extension = data_args.train_file.split(".")[-1]
-    if data_args.validation_file is not None:
-        data_files["validation"] = data_args.validation_file
-        extension = data_args.validation_file.split(".")[-1]
-    if data_args.test_file is not None:
-        data_files["test"] = data_args.test_file
-        extension = data_args.test_file.split(".")[-1]
-    if extension == "jsonl":
-        extension = "json"
-    raw_datasets = load_dataset(
-        extension,
-        data_files=data_files,
-        cache_dir=model_args.cache_dir,
-        token=True if model_args.token else None,
-    )
+    is_indosum = False
+    if data_args.dataset_name is not None:
+        # Downloading and loading a dataset from the hub.
+        raw_datasets = load_dataset(
+            data_args.dataset_name,
+            data_args.dataset_config_name,
+            cache_dir=model_args.cache_dir,
+            token=True if model_args.token else None,
+        )
+    else:
+        data_files = {}
+        extension = ""
+        if data_args.train_file is not None:
+            is_indosum = True
+            data_files["train"] = data_args.train_file
+            extension = data_args.train_file.split(".")[-1]
+        if data_args.validation_file is not None:
+            is_indosum = True
+            data_files["validation"] = data_args.validation_file
+            extension = data_args.validation_file.split(".")[-1]
+        if data_args.test_file is not None:
+            is_indosum = True
+            data_files["test"] = data_args.test_file
+            extension = data_args.test_file.split(".")[-1]
+        if extension == "jsonl":
+            extension = "json"
+        raw_datasets = load_dataset(
+            extension,
+            data_files=data_files,
+            cache_dir=model_args.cache_dir,
+            token=True if model_args.token else None,
+        )
 
-    is_indobart = model_args.model_name_or_path.find("indobart")
+    is_indobart = "indobart" in model_args.model_name_or_path
     config = AutoConfig.from_pretrained(
         (
             model_args.config_name
@@ -452,8 +497,6 @@ def main():
                 " model's position encodings by passing `--resize_position_embeddings`."
             )
 
-    prefix = data_args.source_prefix if data_args.source_prefix is not None else ""
-
     # Preprocessing the datasets.
     # We need to tokenize inputs and targets.
     if training_args.do_train:
@@ -469,8 +512,11 @@ def main():
         return
 
     # Get the column names for input/target.
+    dataset_columns = summarization_name_mapping.get(data_args.dataset_name, None)
     if data_args.text_column is None:
-        text_column = column_names[0]
+        text_column = (
+            dataset_columns[0] if dataset_columns is not None else column_names[0]
+        )
     else:
         text_column = data_args.text_column
         if text_column not in column_names:
@@ -478,7 +524,9 @@ def main():
                 f"--text_column' value '{data_args.text_column}' needs to be one of: {', '.join(column_names)}"
             )
     if data_args.summary_column is None:
-        summary_column = column_names[1]
+        summary_column = (
+            dataset_columns[1] if dataset_columns is not None else column_names[1]
+        )
     else:
         summary_column = data_args.summary_column
         if summary_column not in column_names:
@@ -498,8 +546,33 @@ def main():
             f"`{model.__class__.__name__}`. This will lead to loss being calculated twice and will take up more memory"
         )
 
+    def paragraph_to_text(list_of_paragraphs):
+        texts = []
+
+        for paragraphs in list_of_paragraphs:
+            paragraphs_list = []
+            for paragraph in paragraphs:
+                paragraph_list = [" ".join(sentence) for sentence in paragraph]
+                paragraphs_list.append(" ".join(paragraph_list))
+
+            texts.append(" ".join(paragraphs_list))
+
+        return texts
+
+    def summary_to_text(list_of_summary):
+        texts = []
+
+        for summary in list_of_summary:
+            summary_list = [" ".join(sentence) for sentence in summary]
+            texts.append(" ".join(summary_list))
+
+        return texts
+
     def preprocess_function(examples):
-        # remove pairs where at least one record is None
+        # Preprocess data for indosum
+        if is_indosum:
+            examples[text_column] = paragraph_to_text(examples[text_column])
+            examples[summary_column] = summary_to_text(examples[summary_column])
 
         inputs, targets = [], []
         for i in range(len(examples[text_column])):
@@ -507,7 +580,6 @@ def main():
                 inputs.append(examples[text_column][i])
                 targets.append(examples[summary_column][i])
 
-        inputs = [prefix + inp for inp in inputs]
         model_inputs = tokenizer(
             inputs,
             max_length=data_args.max_source_length,
@@ -538,9 +610,11 @@ def main():
         if "train" not in raw_datasets:
             raise ValueError("--do_train requires a train dataset")
         train_dataset = raw_datasets["train"]
+
         if data_args.max_train_samples is not None:
             max_train_samples = min(len(train_dataset), data_args.max_train_samples)
             train_dataset = train_dataset.select(range(max_train_samples))
+
         with training_args.main_process_first(desc="train dataset map pre-processing"):
             train_dataset = train_dataset.map(
                 preprocess_function,
@@ -556,9 +630,11 @@ def main():
         if "validation" not in raw_datasets:
             raise ValueError("--do_eval requires a validation dataset")
         eval_dataset = raw_datasets["validation"]
+
         if data_args.max_eval_samples is not None:
             max_eval_samples = min(len(eval_dataset), data_args.max_eval_samples)
             eval_dataset = eval_dataset.select(range(max_eval_samples))
+
         with training_args.main_process_first(
             desc="validation dataset map pre-processing"
         ):
@@ -576,11 +652,13 @@ def main():
         if "test" not in raw_datasets:
             raise ValueError("--do_predict requires a test dataset")
         predict_dataset = raw_datasets["test"]
+
         if data_args.max_predict_samples is not None:
             max_predict_samples = min(
                 len(predict_dataset), data_args.max_predict_samples
             )
             predict_dataset = predict_dataset.select(range(max_predict_samples))
+
         with training_args.main_process_first(
             desc="prediction dataset map pre-processing"
         ):
@@ -752,6 +830,15 @@ def main():
         "tasks": "summarization",
         "language": "id",
     }
+    if data_args.dataset_name is not None:
+        kwargs["dataset_tags"] = data_args.dataset_name
+        if data_args.dataset_config_name is not None:
+            kwargs["dataset_args"] = data_args.dataset_config_name
+            kwargs["dataset"] = (
+                f"{data_args.dataset_name} {data_args.dataset_config_name}"
+            )
+        else:
+            kwargs["dataset"] = data_args.dataset_name
 
     if training_args.push_to_hub:
         trainer.push_to_hub(**kwargs)
