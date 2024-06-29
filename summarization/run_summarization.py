@@ -724,6 +724,17 @@ def main():
         result["gen_len"] = np.mean(prediction_lens)
         return result
 
+    def preprocess_logits_for_metrics(logits, labels):
+        """
+        Original Trainer may have a memory leak.
+        This is a workaround to avoid storing too many tensors that are not needed.
+        """
+        if isinstance(logits, tuple):
+            logits = logits[0]
+
+        preds_id = logits.argmax(dim=-1)
+        return preds_id, labels
+
     # Early stopping
     if data_args.patience and data_args.patience > 0:
         training_args.load_best_model_at_end = True
@@ -742,6 +753,7 @@ def main():
         tokenizer=tokenizer,
         data_collator=data_collator,
         compute_metrics=compute_metrics,
+        preprocess_logits_for_metrics=preprocess_logits_for_metrics,
     )
     if data_args.patience and data_args.patience > 0:
         callback = EarlyStoppingCallback(early_stopping_patience=data_args.patience)
