@@ -12,20 +12,14 @@ import nltk
 import numpy as np
 import transformers
 import wandb
-from adapters import AdapterArguments, Seq2SeqAdapterTrainer, setup_adapter_training
+from adapters import (AdapterArguments, Seq2SeqAdapterTrainer,
+                      setup_adapter_training)
 from datasets import load_dataset
 from indobenchmark.tokenization_indonlg import IndoNLGTokenizer
-from transformers import (
-    AutoConfig,
-    AutoModelForSeq2SeqLM,
-    AutoTokenizer,
-    DataCollatorForSeq2Seq,
-    EarlyStoppingCallback,
-    HfArgumentParser,
-    Seq2SeqTrainer,
-    Seq2SeqTrainingArguments,
-    set_seed,
-)
+from transformers import (AutoConfig, AutoModelForSeq2SeqLM, AutoTokenizer,
+                          DataCollatorForSeq2Seq, EarlyStoppingCallback,
+                          HfArgumentParser, Seq2SeqTrainer,
+                          Seq2SeqTrainingArguments, set_seed)
 from transformers.trainer_utils import get_last_checkpoint
 from transformers.utils import check_min_version
 from transformers.utils.versions import require_version
@@ -429,6 +423,23 @@ def main():
         )
 
     is_indobart = "indobart" in model_args.model_name_or_path
+    # Override IndoNLGTokenizer.decode method
+    def decode(
+        self,
+        inputs,
+        skip_special_tokens=False,
+        clean_up_tokenization_spaces: bool = True,
+    ):
+        outputs = super(IndoNLGTokenizer, self).decode(
+            inputs,
+            skip_special_tokens=skip_special_tokens,
+            clean_up_tokenization_spaces=clean_up_tokenization_spaces,
+        )
+        return outputs.replace(" ", "").replace("▁", " ")
+
+    if is_indobart:
+        IndoNLGTokenizer.decode = decode
+
     config = AutoConfig.from_pretrained(
         (
             model_args.config_name
