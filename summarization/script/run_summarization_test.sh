@@ -1,8 +1,8 @@
 #!/bin/bash
-MODEL="indobenchmark/indobart-v2"
-TRAIN_BATCH_SIZE=16
-EVAL_BATCH_SIZE=64
-NUM_EPOCHS=5
+MODEL="indolem/indobert-base-uncased"
+TRAIN_BATCH_SIZE=8
+EVAL_BATCH_SIZE=16
+NUM_EPOCHS=1
 LEARNING_RATE=5e-5
 SEED=42
 
@@ -16,6 +16,7 @@ TEST_FILE="$DATA_DIR/test.01.jsonl"
 
 python run_summarization.py \
 	--model_name_or_path $MODEL \
+	--lang "id" \
 	--text_column "paragraphs" \
 	--summary_column "summary" \
 	--output_dir $OUTPUT_DIR \

@@ -12,14 +12,22 @@ import nltk
 import numpy as np
 import transformers
 import wandb
-from adapters import (AdapterArguments, Seq2SeqAdapterTrainer,
-                      setup_adapter_training)
+from adapters import AdapterArguments, Seq2SeqAdapterTrainer, setup_adapter_training
 from datasets import load_dataset
 from indobenchmark.tokenization_indonlg import IndoNLGTokenizer
-from transformers import (AutoConfig, AutoModelForSeq2SeqLM, AutoTokenizer,
-                          DataCollatorForSeq2Seq, EarlyStoppingCallback,
-                          HfArgumentParser, Seq2SeqTrainer,
-                          Seq2SeqTrainingArguments, set_seed)
+from transformers import (
+    AutoConfig,
+    AutoModelForSeq2SeqLM,
+    AutoTokenizer,
+    DataCollatorForSeq2Seq,
+    EarlyStoppingCallback,
+    EncoderDecoderConfig,
+    EncoderDecoderModel,
+    HfArgumentParser,
+    Seq2SeqTrainer,
+    Seq2SeqTrainingArguments,
+    set_seed,
+)
 from transformers.trainer_utils import get_last_checkpoint
 from transformers.utils import check_min_version
 from transformers.utils.versions import require_version
@@ -37,6 +45,9 @@ class DataTrainingArguments:
     Arguments pertaining to what data we are going to input our model for training and eval.
     """
 
+    lang: Optional[str] = field(
+        default=None, metadata={"help": "Language id for summarization."}
+    )
     dataset_name: Optional[str] = field(
         default=None,
         metadata={"help": "The name of the dataset to use (via the datasets library)."},
@@ -423,6 +434,8 @@ def main():
         )
 
     is_indobart = "indobart" in model_args.model_name_or_path
+    is_indobert = "indobert" in model_args.model_name_or_path
+
     # Override IndoNLGTokenizer.decode method
     def decode(
         self,
@@ -450,6 +463,10 @@ def main():
         revision=model_args.model_revision,
         token=True if model_args.token else None,
     )
+
+    if is_indobert:
+        config = EncoderDecoderConfig.from_encoder_decoder_configs(config, config)
+
     tokenizer = (
         AutoTokenizer.from_pretrained(
             (
@@ -465,15 +482,20 @@ def main():
         if not is_indobart
         else IndoNLGTokenizer.from_pretrained(model_args.model_name_or_path)
     )
-    # TODO: Add for BERT
-    model = AutoModelForSeq2SeqLM.from_pretrained(
-        model_args.model_name_or_path,
-        from_tf=bool(".ckpt" in model_args.model_name_or_path),
-        config=config,
-        cache_dir=model_args.cache_dir,
-        revision=model_args.model_revision,
-        token=True if model_args.token else None,
-    )
+
+    model = None
+    if is_indobert:
+        model = EncoderDecoderModel(config=config)
+        model.config.pad_token_id = tokenizer.pad_token_id
+    else:
+        model = AutoModelForSeq2SeqLM.from_pretrained(
+            model_args.model_name_or_path,
+            from_tf=bool(".ckpt" in model_args.model_name_or_path),
+            config=config,
+            cache_dir=model_args.cache_dir,
+            revision=model_args.model_revision,
+            token=True if model_args.token else None,
+        )
 
     # Convert the model into adapter model
     adapters.init(model)
@@ -865,6 +887,9 @@ def main():
             )
         else:
             kwargs["dataset"] = data_args.dataset_name
+
+    if data_args.lang is not None:
+        kwargs["language"] = data_args.lang
 
     if training_args.push_to_hub:
         trainer.push_to_hub(**kwargs)
