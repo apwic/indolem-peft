@@ -20,7 +20,6 @@ python run_summarization.py \
 	--text_column "paragraphs" \
 	--summary_column "summary" \
 	--source_prefix "summarize: " \
-	--predict_with_generate \
 	--output_dir $OUTPUT_DIR \
 	--train_file $TRAIN_FILE \
 	--validation_file $VALIDATION_FILE \
@@ -30,7 +29,9 @@ python run_summarization.py \
 	--per_device_eval_batch_size $EVAL_BATCH_SIZE \
 	--learning_rate $LEARNING_RATE \
 	--seed $SEED \
-	--fp16 \
+	--bf16 \
+	--predict_with_generate \
+	--max_predict_samples 50 \
 	--evaluation_strategy "epoch" \
 	--logging_strategy "epoch" \
 	--save_strategy "epoch" \
