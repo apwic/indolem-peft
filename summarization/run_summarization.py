@@ -12,22 +12,15 @@ import nltk
 import numpy as np
 import transformers
 import wandb
-from adapters import AdapterArguments, Seq2SeqAdapterTrainer, setup_adapter_training
+from adapters import (AdapterArguments, Seq2SeqAdapterTrainer,
+                      setup_adapter_training)
 from datasets import load_dataset
 from indobenchmark.tokenization_indonlg import IndoNLGTokenizer
-from transformers import (
-    AutoConfig,
-    AutoModelForSeq2SeqLM,
-    AutoTokenizer,
-    DataCollatorForSeq2Seq,
-    EarlyStoppingCallback,
-    EncoderDecoderConfig,
-    EncoderDecoderModel,
-    HfArgumentParser,
-    Seq2SeqTrainer,
-    Seq2SeqTrainingArguments,
-    set_seed,
-)
+from transformers import (AutoConfig, AutoModelForSeq2SeqLM, AutoTokenizer,
+                          DataCollatorForSeq2Seq, EarlyStoppingCallback,
+                          EncoderDecoderConfig, EncoderDecoderModel,
+                          HfArgumentParser, Seq2SeqTrainer,
+                          Seq2SeqTrainingArguments, set_seed)
 from transformers.trainer_utils import get_last_checkpoint
 from transformers.utils import check_min_version
 from transformers.utils.versions import require_version
@@ -885,6 +878,9 @@ def main():
 
         trainer.log_metrics("predict", metrics)
         trainer.save_metrics("predict", metrics)
+
+        if wandb_args.project_name is not None:
+            wandb.log(metrics)
 
         if trainer.is_world_process_zero():
             if training_args.predict_with_generate:

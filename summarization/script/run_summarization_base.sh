@@ -7,7 +7,7 @@ LEARNING_RATE=5e-5
 MAX_LENGTH=128
 SEED=42
 
-DATA_DIR=./data/
+DATA_DIR=./data
 export DATASET=summarization
 
 for i in {0..4}
@@ -41,7 +41,7 @@ do
 		--logging_strategy "epoch" \
 		--save_strategy "epoch" \
 		--save_total_limit 1 \
-		--report_to "tensorboard" "wandb" \
+		--report_to "tensorboard" \
 		--push_to_hub \
 		--project_name "indolem-pelt-$DATASET" \
 		--group_name "baseline" \
