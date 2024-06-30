@@ -42,4 +42,4 @@ python run_summarization.py \
 	--do_train \
 	--do_eval \
 	--do_predict \
-
+	--overwrite_output_dir
