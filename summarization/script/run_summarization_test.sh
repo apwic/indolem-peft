@@ -1,7 +1,7 @@
 #!/bin/bash
 MODEL="LazarusNLP/IndoNanoT5-base"
-TRAIN_BATCH_SIZE=8
-EVAL_BATCH_SIZE=16
+TRAIN_BATCH_SIZE=4
+EVAL_BATCH_SIZE=8
 NUM_EPOCHS=1
 LEARNING_RATE=5e-5
 SEED=42
@@ -9,7 +9,7 @@ SEED=42
 DATA_DIR=./data/
 export DATASET=summarization
 
-OUTPUT_DIR="bin/$DATASET-base-$i"
+OUTPUT_DIR="bin/$DATASET-test"
 TRAIN_FILE="$DATA_DIR/train.01.jsonl"
 VALIDATION_FILE="$DATA_DIR/dev.01.jsonl"
 TEST_FILE="$DATA_DIR/test.01.jsonl"
@@ -31,7 +31,9 @@ python run_summarization.py \
 	--seed $SEED \
 	--bf16 \
 	--predict_with_generate \
+	--max_train_samples 50 \
 	--max_predict_samples 50 \
+	--max_eval_samples 50 \
 	--evaluation_strategy "epoch" \
 	--logging_strategy "epoch" \
 	--save_strategy "epoch" \
@@ -40,3 +42,4 @@ python run_summarization.py \
 	--do_train \
 	--do_eval \
 	--do_predict \
+

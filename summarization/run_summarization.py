@@ -762,7 +762,6 @@ def main():
         if data_args.ignore_pad_token_for_loss:
             # Replace -100 in the pred as we can't decode them.
             preds = np.where(preds != -100, preds, tokenizer.pad_token_id)
-
         decoded_preds = tokenizer.batch_decode(preds, skip_special_tokens=True)
 
         if data_args.ignore_pad_token_for_loss:
@@ -791,8 +790,7 @@ def main():
         if isinstance(logits, tuple):
             logits = logits[0]
 
-        preds_id = logits.argmax(dim=-1)
-        return preds_id, labels
+        return logits.argmax(dim=-1)
 
     # Early stopping
     if data_args.patience and data_args.patience > 0:
