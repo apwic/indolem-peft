@@ -175,6 +175,12 @@ class DataTrainingArguments:
             "help": "Whether to ignore the tokens corresponding to padded labels in the loss computation or not."
         },
     )
+    source_prefix: Optional[str] = field(
+        default="",
+        metadata={
+            "help": "A prefix to add before every source text (useful for T5 models)."
+        },
+    )
     forced_bos_token: Optional[str] = field(
         default=None,
         metadata={
@@ -361,6 +367,15 @@ def main():
     )
     logger.info(f"Training/evaluation parameters {training_args}")
 
+    if (
+        data_args.source_prefix is None
+        and "t5" in model_args.model_name_or_path.lower()
+    ):
+        logger.warning(
+            "You're running a t5 model but didn't provide a source prefix, which is the expected, e.g. with "
+            "`--source_prefix 'summarize: ' `"
+        )
+
     # Detecting last checkpoint.
     last_checkpoint = None
     if (
@@ -536,6 +551,8 @@ def main():
                 " model's position encodings by passing `--resize_position_embeddings`."
             )
 
+    prefix = data_args.source_prefix if data_args.source_prefix is not None else ""
+
     # Preprocessing the datasets.
     # We need to tokenize inputs and targets.
     if training_args.do_train:
@@ -619,6 +636,7 @@ def main():
                 inputs.append(examples[text_column][i])
                 targets.append(examples[summary_column][i])
 
+        inputs = [prefix + inp for inp in inputs]
         model_inputs = tokenizer(
             inputs,
             max_length=data_args.max_source_length,

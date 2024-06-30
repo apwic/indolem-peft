@@ -1,5 +1,5 @@
 #!/bin/bash
-MODEL="indolem/indobert-base-uncased"
+MODEL="LazarusNLP/IndoNanoT5-base"
 TRAIN_BATCH_SIZE=8
 EVAL_BATCH_SIZE=16
 NUM_EPOCHS=1
@@ -19,6 +19,7 @@ python run_summarization.py \
 	--lang "id" \
 	--text_column "paragraphs" \
 	--summary_column "summary" \
+	--source_prefix "summarize: " \
 	--output_dir $OUTPUT_DIR \
 	--train_file $TRAIN_FILE \
 	--validation_file $VALIDATION_FILE \
@@ -28,6 +29,7 @@ python run_summarization.py \
 	--per_device_eval_batch_size $EVAL_BATCH_SIZE \
 	--learning_rate $LEARNING_RATE \
 	--seed $SEED \
+	--fp16 \
 	--evaluation_strategy "epoch" \
 	--logging_strategy "epoch" \
 	--save_strategy "epoch" \
