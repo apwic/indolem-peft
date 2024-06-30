@@ -2,7 +2,7 @@
 MODEL="LazarusNLP/IndoNanoT5-base"
 TRAIN_BATCH_SIZE=4
 EVAL_BATCH_SIZE=8
-NUM_EPOCHS=1
+NUM_EPOCHS=5
 LEARNING_RATE=5e-5
 MAX_LENGTH=128
 SEED=42
@@ -41,7 +41,7 @@ do
 		--logging_strategy "epoch" \
 		--save_strategy "epoch" \
 		--save_total_limit 1 \
-		--report_to "tensorboard" \
+		--report_to "wandb" \
 		--push_to_hub \
 		--project_name "indolem-pelt-$DATASET" \
 		--group_name "baseline" \
