@@ -13,18 +13,11 @@ import transformers
 import wandb
 from adapters import AdapterArguments, AdapterTrainer, setup_adapter_training
 from datasets import ClassLabel, load_dataset
-from transformers import (
-    AutoConfig,
-    AutoModelForTokenClassification,
-    AutoTokenizer,
-    DataCollatorForTokenClassification,
-    HfArgumentParser,
-    PretrainedConfig,
-    PreTrainedTokenizerFast,
-    Trainer,
-    TrainingArguments,
-    set_seed,
-)
+from transformers import (AutoConfig, AutoModelForTokenClassification,
+                          AutoTokenizer, DataCollatorForTokenClassification,
+                          HfArgumentParser, PretrainedConfig,
+                          PreTrainedTokenizerFast, Trainer, TrainingArguments,
+                          set_seed)
 from transformers.trainer_utils import get_last_checkpoint
 from transformers.utils import check_min_version
 from transformers.utils.versions import require_version
@@ -687,7 +680,7 @@ def main():
         trainer.log_metrics("predict", metrics)
         trainer.save_metrics("predict", metrics)
 
-        if training_args.project_name is not None:
+        if wandb_args.project_name is not None:
             wandb.log(metrics)
 
         # Save predictions

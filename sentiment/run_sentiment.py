@@ -591,7 +591,7 @@ def main():
             trainer.log_metrics("predict", metrics)
             trainer.save_metrics("predict", metrics)
 
-            if training_args.project_name is not None:
+            if wandb_args.project_name is not None:
                 wandb.log(metrics)
 
             output_predict_file = os.path.join(

@@ -38,7 +38,7 @@ do
         --logging_strategy "epoch" \
         --save_strategy "epoch" \
         --save_total_limit 1 \
-        --report_to "tensorboard" "wandb" \
+        --report_to "wandb" \
         --push_to_hub \
         --project_name "indolem-pelt-$DATASET" \
         --group_name "baseline" \
