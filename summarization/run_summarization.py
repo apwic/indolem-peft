@@ -12,26 +12,38 @@ import nltk
 import numpy as np
 import transformers
 import wandb
-from adapters import (AdapterArguments, Seq2SeqAdapterTrainer,
-                      setup_adapter_training)
+from adapters import AdapterArguments, Seq2SeqAdapterTrainer, setup_adapter_training
 from datasets import load_dataset
+from filelock import FileLock
 from indobenchmark.tokenization_indonlg import IndoNLGTokenizer
-from transformers import (AutoConfig, AutoModelForSeq2SeqLM, AutoTokenizer,
-                          DataCollatorForSeq2Seq, EarlyStoppingCallback,
-                          EncoderDecoderConfig, EncoderDecoderModel,
-                          HfArgumentParser, Seq2SeqTrainer,
-                          Seq2SeqTrainingArguments, set_seed)
+from transformers import (
+    AutoConfig,
+    AutoModelForSeq2SeqLM,
+    AutoTokenizer,
+    DataCollatorForSeq2Seq,
+    EarlyStoppingCallback,
+    EncoderDecoderConfig,
+    EncoderDecoderModel,
+    HfArgumentParser,
+    Seq2SeqTrainer,
+    Seq2SeqTrainingArguments,
+    set_seed,
+)
 from transformers.trainer_utils import get_last_checkpoint
 from transformers.utils import check_min_version
 from transformers.utils.versions import require_version
 
-# Download package for nltk
-nltk.download("punkt")
 # Will error if the minimal version of Transformers is not installed. Remove at your own risks.
 check_min_version("4.40.0")
 require_version("datasets>=1.8.0", "To fix: pip install -r requirements.txt")
 warnings.filterwarnings("ignore", category=FutureWarning)
 logger = logging.getLogger(__name__)
+
+try:
+    nltk.data.find("tokenizers/punkt")
+except (LookupError, OSError):
+    with FileLock(".lock") as lock:
+        nltk.download("punkt", quiet=True)
 
 
 @dataclass(kw_only=True)
