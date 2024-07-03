@@ -1,7 +1,7 @@
 #!/bin/bash
 export MODEL="LazarusNLP/IndoNanoT5-base"
 export TRAIN_BATCH_SIZE=4
-export EVAL_BATCH_SIZE=16
+export EVAL_BATCH_SIZE=8
 export NUM_EPOCHS=5
 export LEARNING_RATE=1e-3
 export MAX_LENGTH=512
