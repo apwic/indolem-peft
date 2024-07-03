@@ -1,14 +1,4 @@
 #!/bin/bash
-MAX_LENGTH=200
-MODEL="indolem/indobert-base-uncased"
-BATCH_SIZE=30
-NUM_EPOCHS=20
-LEARNING_RATE=5e-5
-SEED=42
-
-DATA_DIR=./data
-
-# Define hyperparameter arrays for prefix length
 declare -a prefix_lengths=("10" "20" "30")
 
 for i in {0..4}
@@ -16,13 +6,12 @@ do
     for prefix_length in "${prefix_lengths[@]}"
     do
         echo "Training on fold $i with Prefix-Tuning prefix_length=$prefix_length"
-        
-        OUTPUT_DIR="bin/sentiment-pt-pl${prefix_length}-$i"
+
+        OUTPUT_DIR="bin/$DATASET-pt-pl${prefix_length}-$i"
         TRAIN_FILE="$DATA_DIR/train$i.csv"
         VALIDATION_FILE="$DATA_DIR/dev$i.csv"
         TEST_FILE="$DATA_DIR/test$i.csv"
 
-        # Run the model training and evaluation
         python run_sentiment.py \
             --model_name_or_path $MODEL \
             --label_names "labels" \
@@ -41,10 +30,10 @@ do
             --save_total_limit 1 \
             --report_to "wandb" \
             --push_to_hub \
-            --project_name "indolem-pelt-sentiment" \
+            --project_name "indolem-pelt-$DATASET" \
             --group_name "pt-pl$prefix_length" \
             --job_type "fold-$i" \
-            --run_name "sentiment-pt-pl$prefix_length-$i" \
+            --run_name "$DATASET-pt-pl$prefix_length-$i" \
             --do_train \
             --do_eval \
             --do_predict \

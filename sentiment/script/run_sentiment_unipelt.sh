@@ -1,23 +1,13 @@
 #!/bin/bash
-MAX_LENGTH=200
-MODEL="indolem/indobert-base-uncased"
-BATCH_SIZE=30
-NUM_EPOCHS=20
-LEARNING_RATE=5e-5
-SEED=42
-
-DATA_DIR=./data
-
 for i in {0..4}
 do
     echo "Training on fold $i with UniPELT"
-    
-    OUTPUT_DIR="bin/sentiment-unipelt-$i"
+
+    OUTPUT_DIR="bin/$DATASET-unipelt-$i"
     TRAIN_FILE="$DATA_DIR/train$i.csv"
     VALIDATION_FILE="$DATA_DIR/dev$i.csv"
     TEST_FILE="$DATA_DIR/test$i.csv"
-    
-    # Run the model training and evaluation
+
     python run_sentiment.py \
         --model_name_or_path $MODEL \
         --label_names "labels" \
@@ -36,10 +26,10 @@ do
         --save_total_limit 1 \
         --report_to "wandb" \
         --push_to_hub \
-        --project_name "indolem-pelt-sentiment" \
+        --project_name "indolem-pelt-$DATASET" \
         --group_name "unipelt" \
         --job_type "fold-$i" \
-        --run_name "sentiment-unipelt-$i" \
+        --run_name "$DATASET-unipelt-$i" \
         --do_train \
         --do_eval \
         --do_predict \

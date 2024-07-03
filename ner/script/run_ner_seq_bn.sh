@@ -1,14 +1,4 @@
 #!/bin/bash
-MODEL="indolem/indobert-base-uncased"
-TRAIN_BATCH_SIZE=16
-EVAL_BATCH_SIZE=64
-NUM_EPOCHS=100
-LEARNING_RATE=5e-5
-MAX_LENGTH=128
-SEED=42
-
-DATA_DIR=./data/$DATASET
-
 for i in {0..4}
 do
     echo "Training on fold $i with Seq Bottleneck (Adapter)"

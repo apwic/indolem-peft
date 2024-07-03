@@ -1,14 +1,4 @@
 #!/bin/bash
-MAX_LENGTH=200
-MODEL="indolem/indobert-base-uncased"
-BATCH_SIZE=30
-NUM_EPOCHS=20
-LEARNING_RATE=5e-5
-SEED=42
-
-DATA_DIR=./data
-
-# Define hyperparameter arrays
 declare -a ranks=("8" "16")
 
 for i in {0..4}
@@ -16,13 +6,12 @@ do
     for rank in "${ranks[@]}"
     do
         echo "Training on fold $i with LoRA r=$rank"
-        
-        OUTPUT_DIR="bin/sentiment-lora-r${rank}-$i"
+
+        OUTPUT_DIR="bin/$DATASET-lora-r${rank}-$i"
         TRAIN_FILE="$DATA_DIR/train$i.csv"
         VALIDATION_FILE="$DATA_DIR/dev$i.csv"
         TEST_FILE="$DATA_DIR/test$i.csv"
-        
-        # Run the model training and evaluation
+
         python run_sentiment.py \
             --model_name_or_path $MODEL \
             --label_names "labels" \
@@ -41,10 +30,10 @@ do
             --save_total_limit 1 \
             --report_to "wandb" \
             --push_to_hub \
-            --project_name "indolem-pelt-sentiment" \
+            --project_name "indolem-pelt-$DATASET" \
             --group_name "lora-r${rank}" \
             --job_type "fold-$i" \
-            --run_name "sentiment-lora-r${rank}-$i" \
+            --run_name "$DATASET-lora-r${rank}-$i" \
             --do_train \
             --do_eval \
             --do_predict \

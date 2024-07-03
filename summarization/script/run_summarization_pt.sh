@@ -1,15 +1,4 @@
 #!/bin/bash
-MODEL="LazarusNLP/IndoNanoT5-base"
-TRAIN_BATCH_SIZE=4
-EVAL_BATCH_SIZE=16
-NUM_EPOCHS=5
-LEARNING_RATE=5e-5
-MAX_LENGTH=128
-SEED=42
-
-DATA_DIR=./data
-export DATASET=summarization
-
 declare -a prefix_lengths=("10" "20" "30")
 
 for i in {0..4}

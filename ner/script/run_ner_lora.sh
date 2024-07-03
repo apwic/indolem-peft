@@ -1,18 +1,4 @@
 #!/bin/bash
-MODEL="indolem/indobert-base-uncased"
-TRAIN_BATCH_SIZE=16
-EVAL_BATCH_SIZE=64
-NUM_EPOCHS=100
-LEARNING_RATE=5e-5
-MAX_LENGTH=128
-SEED=42
-
-DATA_DIR=./data/$DATASET
-
-TRAIN_FILE="$DATA_DIR/train.csv"
-VALIDATION_FILE="$DATA_DIR/dev.csv"
-TEST_FILE="$DATA_DIR/test.csv"
-
 declare -a ranks=("8" "16")
 
 for i in {0..4}

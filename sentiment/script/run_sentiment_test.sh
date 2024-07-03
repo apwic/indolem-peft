@@ -5,10 +5,10 @@ BATCH_SIZE=30
 NUM_EPOCHS=1
 LEARNING_RATE=5e-5
 SEED=42
-
 DATA_DIR=./data
+DATASET=sentiment
 
-OUTPUT_DIR="bin/sentiment-base-test"
+OUTPUT_DIR="bin/$DATASET-base-test"
 TRAIN_FILE="$DATA_DIR/train0.csv"
 VALIDATION_FILE="$DATA_DIR/dev0.csv"
 TEST_FILE="$DATA_DIR/test0.csv"
@@ -30,7 +30,7 @@ python run_sentiment.py \
     --save_strategy "epoch" \
     --save_total_limit 1 \
     --report_to "wandb" \
-    --project_name "indolem-pelt-sentiment-temp" \
+    --project_name "indolem-pelt-$DATASET-temp" \
     --do_train \
     --do_eval \
     --do_predict \
