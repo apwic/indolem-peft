@@ -1,5 +1,4 @@
 #!/bin/bash
-
 for i in {0..4}
 do
 	echo "Training on fold $i with UniPELT"
@@ -23,7 +22,11 @@ do
 		--per_device_train_batch_size $TRAIN_BATCH_SIZE \
 		--per_device_eval_batch_size $EVAL_BATCH_SIZE \
 		--learning_rate $LEARNING_RATE \
-		--generation_max_length $MAX_LENGTH \
+		--weight_decay $WEIGHT_DECAY \
+		--num_beams $NUM_BEAMS \
+		--max_source_length $MAX_LENGTH \
+		--max_target_length $MAX_LENGTH \
+		--pad_to_max_length \
 		--seed $SEED \
 		--bf16 \
 		--predict_with_generate \
