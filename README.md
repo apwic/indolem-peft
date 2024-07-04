@@ -6,7 +6,7 @@ IndoLEM with PETL usage.
 
 > It's recommended to use the conda environment to specify python version, which in this case is using Python 3.11.
 
-Install ![miniconda](https://docs.anaconda.com/miniconda/) to create the conda environment.
+Install [miniconda](https://docs.anaconda.com/miniconda/) to create the conda environment.
 
 Create env using conda to make it easier
 
