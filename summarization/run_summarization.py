@@ -422,6 +422,7 @@ def main():
             wandb.init(project=wandb_args.project_name, name=training_args.run_name)
 
     # Loading a dataset from local files.
+    # Using the dataset from this repo (using IndoSUM)
     is_indosum = False
     if data_args.dataset_name is not None:
         # Downloading and loading a dataset from the hub.
@@ -456,7 +457,7 @@ def main():
         )
 
     is_indobart = "indobart" in model_args.model_name_or_path
-    is_indobert = "indobert" in model_args.model_name_or_path
+    is_bert = "indobert" in model_args.model_name_or_path
 
     # Override IndoNLGTokenizer.decode method
     def decode(
@@ -486,7 +487,7 @@ def main():
         token=True if model_args.token else None,
     )
 
-    if is_indobert:
+    if is_bert:
         config = EncoderDecoderConfig.from_encoder_decoder_configs(config, config)
 
     tokenizer = (
@@ -506,7 +507,7 @@ def main():
     )
 
     model = None
-    if is_indobert:
+    if is_bert:
         model = EncoderDecoderModel(config=config)
         model.config.pad_token_id = tokenizer.pad_token_id
     else:
