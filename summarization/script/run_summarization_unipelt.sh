@@ -24,6 +24,7 @@ do
 		--learning_rate $LEARNING_RATE \
 		--weight_decay $WEIGHT_DECAY \
 		--num_beams $NUM_BEAMS \
+		--patience $PATIENCE \
 		--max_source_length $MAX_LENGTH \
 		--max_target_length $MAX_LENGTH \
 		--pad_to_max_length \
@@ -34,6 +35,8 @@ do
 		--logging_strategy "epoch" \
 		--save_strategy "epoch" \
 		--save_total_limit 1 \
+		--load_best_model_at_end \
+		--metric_for_best_model "rouge1" \
 		--report_to "tensorboard" \
 		--push_to_hub \
 		--project_name "indolem-pelt-$DATASET" \

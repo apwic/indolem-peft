@@ -12,23 +12,15 @@ import nltk
 import numpy as np
 import transformers
 import wandb
-from adapters import AdapterArguments, Seq2SeqAdapterTrainer, setup_adapter_training
+from adapters import (AdapterArguments, AutoAdapterModel,
+                      Seq2SeqAdapterTrainer, setup_adapter_training)
 from datasets import load_dataset
 from filelock import FileLock
 from indobenchmark.tokenization_indonlg import IndoNLGTokenizer
-from transformers import (
-    AutoConfig,
-    AutoModelForSeq2SeqLM,
-    AutoTokenizer,
-    DataCollatorForSeq2Seq,
-    EarlyStoppingCallback,
-    EncoderDecoderConfig,
-    EncoderDecoderModel,
-    HfArgumentParser,
-    Seq2SeqTrainer,
-    Seq2SeqTrainingArguments,
-    set_seed,
-)
+from transformers import (AutoConfig, AutoTokenizer, DataCollatorForSeq2Seq,
+                          EarlyStoppingCallback, EncoderDecoderConfig,
+                          EncoderDecoderModel, HfArgumentParser,
+                          Seq2SeqTrainer, Seq2SeqTrainingArguments, set_seed)
 from transformers.trainer_utils import get_last_checkpoint
 from transformers.utils import check_min_version
 from transformers.utils.versions import require_version
@@ -511,7 +503,7 @@ def main():
         model = EncoderDecoderModel(config=config)
         model.config.pad_token_id = tokenizer.pad_token_id
     else:
-        model = AutoModelForSeq2SeqLM.from_pretrained(
+        model = AutoAdapterModel.from_pretrained(
             model_args.model_name_or_path,
             from_tf=bool(".ckpt" in model_args.model_name_or_path),
             config=config,
