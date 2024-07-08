@@ -37,7 +37,7 @@ do
 		--save_total_limit 1 \
 		--load_best_model_at_end \
 		--metric_for_best_model "rouge1" \
-		--report_to "tensorboard" \
+		--report_to "wandb" \
 		--push_to_hub \
 		--project_name "indolem-pelt-$DATASET" \
 		--group_name "unipelt" \
