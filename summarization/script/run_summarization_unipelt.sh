@@ -27,7 +27,7 @@ do
 		--optim "adamw_torch_fused" \
 		--max_source_length $MAX_LENGTH \
 		--max_target_length $MAX_LENGTH \
-		--generation_max_length $MAX_LENGTH \
+		--generation_max_length $GEN_MAX_LENGTH \
 		--pad_to_max_length \
 		--seed $SEED \
 		--bf16 \
