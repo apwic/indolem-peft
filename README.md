@@ -1,6 +1,6 @@
-# indolem-petl
+# IndoLEM-PEFT
 
-IndoLEM with PETL usage.
+IndoLEM with PEFT usage.
 
 ## How to use
 
