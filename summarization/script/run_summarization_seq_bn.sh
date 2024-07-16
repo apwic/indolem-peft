@@ -13,7 +13,6 @@ do
 		--lang "id" \
 		--text_column "paragraphs" \
 		--summary_column "summary" \
-		--source_prefix "summarize: " \
 		--output_dir $OUTPUT_DIR \
 		--train_file $TRAIN_FILE \
 		--validation_file $VALIDATION_FILE \
