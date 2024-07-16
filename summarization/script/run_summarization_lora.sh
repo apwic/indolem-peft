@@ -28,8 +28,10 @@ do
 			--weight_decay $WEIGHT_DECAY \
 			--num_beams $NUM_BEAMS \
 			--patience $PATIENCE \
+			--optim "adamw_torch_fused" \
 			--max_source_length $MAX_LENGTH \
 			--max_target_length $MAX_LENGTH \
+			--generation_max_length $MAX_LENGTH \
 			--pad_to_max_length \
 			--seed $SEED \
 			--bf16 \
