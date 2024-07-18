@@ -12,14 +12,25 @@ import nltk
 import numpy as np
 import transformers
 import wandb
-from adapters import (AdapterArguments, AutoAdapterModel,
-                      Seq2SeqAdapterTrainer, setup_adapter_training)
+from adapters import (
+    AdapterArguments,
+    AutoAdapterModel,
+    Seq2SeqAdapterTrainer,
+    setup_adapter_training,
+)
 from datasets import load_dataset
 from filelock import FileLock
 from numpy.random import default_rng
-from transformers import (AutoConfig, AutoTokenizer, DataCollatorForSeq2Seq,
-                          EarlyStoppingCallback, HfArgumentParser,
-                          Seq2SeqTrainer, Seq2SeqTrainingArguments, set_seed)
+from transformers import (
+    AutoConfig,
+    AutoTokenizer,
+    DataCollatorForSeq2Seq,
+    EarlyStoppingCallback,
+    HfArgumentParser,
+    Seq2SeqTrainer,
+    Seq2SeqTrainingArguments,
+    set_seed,
+)
 from transformers.trainer_utils import get_last_checkpoint
 from transformers.utils import check_min_version
 from transformers.utils.versions import require_version
@@ -853,8 +864,12 @@ def main():
 
         if trainer.is_world_process_zero():
             if training_args.predict_with_generate:
+                predictions = predict_results.predictions
+                predictions = np.where(
+                    predictions != -100, predictions, tokenizer.pad_token_id
+                )
                 predictions = tokenizer.batch_decode(
-                    predict_results.predictions,
+                    predictions,
                     skip_special_tokens=True,
                     clean_up_tokenization_spaces=True,
                 )
