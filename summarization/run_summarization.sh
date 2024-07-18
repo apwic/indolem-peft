@@ -10,8 +10,8 @@ export NUM_BEAMS=5
 export WEIGHT_DECAY=0.01
 export PATIENCE=5
 export SEED=42
-export DATA_DIR=./data
-export DATASET=summarization
+export DATASET=indosum
+export DATA_DIR=./data/$DATASET
 
 source ./script/run_summarization_base.sh
 source ./script/run_summarization_lora.sh
