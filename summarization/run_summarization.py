@@ -11,29 +11,18 @@ import evaluate
 import nltk
 import numpy as np
 import transformers
-from adapters import (
-    AdapterArguments,
-    AutoAdapterModel,
-    Seq2SeqAdapterTrainer,
-    setup_adapter_training,
-)
+import wandb
+from adapters import (AdapterArguments, AutoAdapterModel,
+                      Seq2SeqAdapterTrainer, setup_adapter_training)
 from datasets import load_dataset
 from filelock import FileLock
-from transformers import (
-    AutoConfig,
-    AutoTokenizer,
-    DataCollatorForSeq2Seq,
-    EarlyStoppingCallback,
-    HfArgumentParser,
-    Seq2SeqTrainer,
-    Seq2SeqTrainingArguments,
-    set_seed,
-)
+from numpy.random import default_rng
+from transformers import (AutoConfig, AutoTokenizer, DataCollatorForSeq2Seq,
+                          EarlyStoppingCallback, HfArgumentParser,
+                          Seq2SeqTrainer, Seq2SeqTrainingArguments, set_seed)
 from transformers.trainer_utils import get_last_checkpoint
 from transformers.utils import check_min_version
 from transformers.utils.versions import require_version
-
-import wandb
 
 # Will error if the minimal version of Transformers is not installed. Remove at your own risks.
 check_min_version("4.40.0")
@@ -65,6 +54,12 @@ class DataTrainingArguments:
         default=None,
         metadata={
             "help": "The configuration name of the dataset to use (via the datasets library)."
+        },
+    )
+    dataset_data_dir: Optional[str] = field(
+        default=None,
+        metadata={
+            "help": "The dataset directory where the dataset is loaded (via the datasets library)."
         },
     )
     train_file: Optional[str] = field(
@@ -431,6 +426,7 @@ def main():
         raw_datasets = load_dataset(
             data_args.dataset_name,
             data_args.dataset_config_name,
+            data_args.dataset_data_dir,
             cache_dir=model_args.cache_dir,
             token=True if model_args.token else None,
         )
@@ -452,6 +448,12 @@ def main():
         if extension == "jsonl":
             extension = "json"
         raw_datasets = load_dataset(
+    dataset_data_dir = Optional[str] = field(
+        default=None,
+        metadata={
+            "help": "The dataset directory where the dataset is loaded (via the datasets library)."
+        }
+    )
             extension,
             data_files=data_files,
             cache_dir=model_args.cache_dir,
