@@ -29,7 +29,6 @@ python run_summarization.py \
 	--per_device_eval_batch_size $EVAL_BATCH_SIZE \
 	--learning_rate $LEARNING_RATE \
 	--seed $SEED \
-	--bf16 \
 	--predict_with_generate \
 	--max_train_samples 50 \
 	--max_predict_samples 50 \

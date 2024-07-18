@@ -11,19 +11,29 @@ import evaluate
 import nltk
 import numpy as np
 import transformers
-import wandb
-from adapters import (AdapterArguments, AutoAdapterModel,
-                      Seq2SeqAdapterTrainer, setup_adapter_training)
+from adapters import (
+    AdapterArguments,
+    AutoAdapterModel,
+    Seq2SeqAdapterTrainer,
+    setup_adapter_training,
+)
 from datasets import load_dataset
 from filelock import FileLock
-from indobenchmark.tokenization_indonlg import IndoNLGTokenizer
-from transformers import (AutoConfig, AutoTokenizer, DataCollatorForSeq2Seq,
-                          EarlyStoppingCallback, EncoderDecoderConfig,
-                          EncoderDecoderModel, HfArgumentParser,
-                          Seq2SeqTrainer, Seq2SeqTrainingArguments, set_seed)
+from transformers import (
+    AutoConfig,
+    AutoTokenizer,
+    DataCollatorForSeq2Seq,
+    EarlyStoppingCallback,
+    HfArgumentParser,
+    Seq2SeqTrainer,
+    Seq2SeqTrainingArguments,
+    set_seed,
+)
 from transformers.trainer_utils import get_last_checkpoint
 from transformers.utils import check_min_version
 from transformers.utils.versions import require_version
+
+import wandb
 
 # Will error if the minimal version of Transformers is not installed. Remove at your own risks.
 check_min_version("4.40.0")
@@ -448,26 +458,6 @@ def main():
             token=True if model_args.token else None,
         )
 
-    is_indobart = "indobart" in model_args.model_name_or_path
-    is_bert = "indobert" in model_args.model_name_or_path
-
-    # Override IndoNLGTokenizer.decode method
-    def decode(
-        self,
-        inputs,
-        skip_special_tokens=False,
-        clean_up_tokenization_spaces: bool = True,
-    ):
-        outputs = super(IndoNLGTokenizer, self).decode(
-            inputs,
-            skip_special_tokens=skip_special_tokens,
-            clean_up_tokenization_spaces=clean_up_tokenization_spaces,
-        )
-        return outputs.replace(" ", "").replace("▁", " ")
-
-    if is_indobart:
-        IndoNLGTokenizer.decode = decode
-
     config = AutoConfig.from_pretrained(
         (
             model_args.config_name
@@ -479,38 +469,26 @@ def main():
         token=True if model_args.token else None,
     )
 
-    if is_bert:
-        config = EncoderDecoderConfig.from_encoder_decoder_configs(config, config)
-
-    tokenizer = (
-        AutoTokenizer.from_pretrained(
-            (
-                model_args.tokenizer_name
-                if model_args.tokenizer_name
-                else model_args.model_name_or_path
-            ),
-            cache_dir=model_args.cache_dir,
-            use_fast=model_args.use_fast_tokenizer,
-            revision=model_args.model_revision,
-            token=True if model_args.token else None,
-        )
-        if not is_indobart
-        else IndoNLGTokenizer.from_pretrained(model_args.model_name_or_path)
+    tokenizer = AutoTokenizer.from_pretrained(
+        (
+            model_args.tokenizer_name
+            if model_args.tokenizer_name
+            else model_args.model_name_or_path
+        ),
+        cache_dir=model_args.cache_dir,
+        use_fast=model_args.use_fast_tokenizer,
+        revision=model_args.model_revision,
+        token=True if model_args.token else None,
     )
 
-    model = None
-    if is_bert:
-        model = EncoderDecoderModel(config=config)
-        model.config.pad_token_id = tokenizer.pad_token_id
-    else:
-        model = AutoAdapterModel.from_pretrained(
-            model_args.model_name_or_path,
-            from_tf=bool(".ckpt" in model_args.model_name_or_path),
-            config=config,
-            cache_dir=model_args.cache_dir,
-            revision=model_args.model_revision,
-            token=True if model_args.token else None,
-        )
+    model = AutoAdapterModel.from_pretrained(
+        model_args.model_name_or_path,
+        from_tf=bool(".ckpt" in model_args.model_name_or_path),
+        config=config,
+        cache_dir=model_args.cache_dir,
+        revision=model_args.model_revision,
+        token=True if model_args.token else None,
+    )
 
     # Convert the model into adapter model
     adapters.init(model)
