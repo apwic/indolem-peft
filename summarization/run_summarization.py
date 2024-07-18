@@ -12,14 +12,25 @@ import nltk
 import numpy as np
 import transformers
 import wandb
-from adapters import (AdapterArguments, AutoAdapterModel,
-                      Seq2SeqAdapterTrainer, setup_adapter_training)
+from adapters import (
+    AdapterArguments,
+    AutoAdapterModel,
+    Seq2SeqAdapterTrainer,
+    setup_adapter_training,
+)
 from datasets import load_dataset
 from filelock import FileLock
 from numpy.random import default_rng
-from transformers import (AutoConfig, AutoTokenizer, DataCollatorForSeq2Seq,
-                          EarlyStoppingCallback, HfArgumentParser,
-                          Seq2SeqTrainer, Seq2SeqTrainingArguments, set_seed)
+from transformers import (
+    AutoConfig,
+    AutoTokenizer,
+    DataCollatorForSeq2Seq,
+    EarlyStoppingCallback,
+    HfArgumentParser,
+    Seq2SeqTrainer,
+    Seq2SeqTrainingArguments,
+    set_seed,
+)
 from transformers.trainer_utils import get_last_checkpoint
 from transformers.utils import check_min_version
 from transformers.utils.versions import require_version
@@ -448,12 +459,6 @@ def main():
         if extension == "jsonl":
             extension = "json"
         raw_datasets = load_dataset(
-    dataset_data_dir = Optional[str] = field(
-        default=None,
-        metadata={
-            "help": "The dataset directory where the dataset is loaded (via the datasets library)."
-        }
-    )
             extension,
             data_files=data_files,
             cache_dir=model_args.cache_dir,
