@@ -12,25 +12,14 @@ import nltk
 import numpy as np
 import transformers
 import wandb
-from adapters import (
-    AdapterArguments,
-    AutoAdapterModel,
-    Seq2SeqAdapterTrainer,
-    setup_adapter_training,
-)
+from adapters import (AdapterArguments, AutoAdapterModel,
+                      Seq2SeqAdapterTrainer, setup_adapter_training)
 from datasets import load_dataset
 from filelock import FileLock
 from numpy.random import default_rng
-from transformers import (
-    AutoConfig,
-    AutoTokenizer,
-    DataCollatorForSeq2Seq,
-    EarlyStoppingCallback,
-    HfArgumentParser,
-    Seq2SeqTrainer,
-    Seq2SeqTrainingArguments,
-    set_seed,
-)
+from transformers import (AutoConfig, AutoTokenizer, DataCollatorForSeq2Seq,
+                          EarlyStoppingCallback, HfArgumentParser,
+                          Seq2SeqTrainer, Seq2SeqTrainingArguments, set_seed)
 from transformers.trainer_utils import get_last_checkpoint
 from transformers.utils import check_min_version
 from transformers.utils.versions import require_version
@@ -765,16 +754,6 @@ def main():
         result["gen_len"] = np.mean(prediction_lens)
         return result
 
-    def preprocess_logits_for_metrics(logits, labels):
-        """
-        Original Trainer may have a memory leak.
-        This is a workaround to avoid storing too many tensors that are not needed.
-        """
-        if isinstance(logits, tuple):
-            logits = logits[0]
-
-        return logits.argmax(dim=-1)
-
     # Early stopping
     if data_args.patience and data_args.patience > 0:
         training_args.load_best_model_at_end = True
@@ -795,8 +774,8 @@ def main():
         compute_metrics=(
             compute_metrics if training_args.predict_with_generate else None
         ),
-        preprocess_logits_for_metrics=preprocess_logits_for_metrics,
     )
+
     if data_args.patience and data_args.patience > 0:
         callback = EarlyStoppingCallback(early_stopping_patience=data_args.patience)
         trainer.add_callback(callback)
