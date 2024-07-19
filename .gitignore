@@ -4,7 +4,7 @@ __pycache__/
 *$py.class
 bin/
 wandb/
-liputan6/
+**/data/liputan6/
 .vscode/
 .DS_Store
 

@@ -12,6 +12,11 @@ export PATIENCE=5
 export SEED=42
 export DATASET=indosum
 export DATA_DIR=./data/$DATASET
+export DATASET_NAME=id_liputan6
+export DATASET_CONFIG_NAME=canonical
+export TEXT_COLUMN="clean_article"
+export SUMMARY_COLUMN="clean_summary"
+export SOURCE_PREFIX="summarize: "
 
 source ./script/$DATASET/run_summarization_base.sh
 source ./script/$DATASET/run_summarization_lora.sh

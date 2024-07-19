@@ -5,9 +5,9 @@ for i in {0..4}
 do
 	for prefix_length in "${prefix_lengths[@]}"
 	do
-		echo "Training on fold $i with Prefix-Tuning r=$prefix_length"
+		echo "Training on fold $i with Prefix-Tuning prefix_length=$prefix_length"
 
-		OUTPUT_DIR="bin/$DATASET-pt-$i"
+		OUTPUT_DIR="bin/$DATASET-pt-pl${prefix_length}-$i"
 		TRAIN_FILE="$DATA_DIR/train.0$((i + 1)).jsonl"
 		VALIDATION_FILE="$DATA_DIR/dev.0$((i + 1)).jsonl"
 		TEST_FILE="$DATA_DIR/test.0$((i + 1)).jsonl"
@@ -56,6 +56,6 @@ do
 			--adapter_config "prefix_tuning[prefix_length=$prefix_length]" \
 			--train_adapter
 
-		echo "Finished training on fold $ with Prefix-Tuning r=$prefix_length"
+		echo "Finished training on fold $ with Prefix-Tuning prefix_length=$prefix_length"
 	done
 done
