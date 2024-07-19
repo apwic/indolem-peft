@@ -14,10 +14,10 @@ do
 
 		python run_summarization.py \
 			--model_name_or_path $MODEL \
-			--lang "id" \
-			--text_column "paragraphs" \
-			--summary_column "summary" \
-			--source_prefix "summarize: " \
+			--lang $LANG \
+			--text_column $TEXT_COLUMN \
+			--summary_column $SUMMARY_COLUMN \
+			--source_prefix $SOURCE_PREFIX \
 			--output_dir $OUTPUT_DIR \
 			--train_file $TRAIN_FILE \
 			--validation_file $VALIDATION_FILE \
