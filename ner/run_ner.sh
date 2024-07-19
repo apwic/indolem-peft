@@ -6,6 +6,8 @@ export NUM_EPOCHS=100
 export LEARNING_RATE=5e-5
 export MAX_LENGTH=128
 export SEED=42
+export TEXT_COLUMN_NAME="tokens"
+export LABEL_COLUMN_NAME="ner_tags"
 
 export DATASET=nerugm
 export DATA_DIR=./data/$DATASET

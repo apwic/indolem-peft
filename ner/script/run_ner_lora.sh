@@ -14,9 +14,8 @@ do
 
         python run_ner.py \
             --model_name_or_path $MODEL \
-            --label_names "labels" \
-            --text_column_name "tokens" \
-            --label_column_name "ner_tags" \
+            --text_column_name $TEXT_COLUMN_NAME \
+            --label_column_name $LABEL_COLUMN_NAME \
             --output_dir $OUTPUT_DIR \
             --train_file $TRAIN_FILE \
             --validation_file $VALIDATION_FILE \
