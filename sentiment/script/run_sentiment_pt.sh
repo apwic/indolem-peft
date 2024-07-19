@@ -1,5 +1,5 @@
 #!/bin/bash
-declare -a prefix_lengths=("10" "20" "30")
+declare -a prefix_lengths=("5" "50")
 
 for i in {0..4}
 do
@@ -14,7 +14,7 @@ do
 
         python run_sentiment.py \
             --model_name_or_path $MODEL \
-            --label_names "labels" \
+            --label_names $LABEL_NAMES \
             --output_dir $OUTPUT_DIR \
             --train_file $TRAIN_FILE \
             --validation_file $VALIDATION_FILE \
