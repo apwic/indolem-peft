@@ -9,14 +9,6 @@ export SEED=42
 export TEXT_COLUMN_NAME="tokens"
 export LABEL_COLUMN_NAME="ner_tags"
 
-export DATASET=nerugm
-export DATA_DIR=./data/$DATASET
-source ./script/run_ner_base.sh
-source ./script/run_ner_lora.sh
-source ./script/run_ner_pt.sh
-source ./script/run_ner_unipelt.sh
-source ./script/run_ner_seq_bn.sh
-
 export DATASET=nerui
 export DATA_DIR=./data/$DATASET
 source ./script/run_ner_base.sh
