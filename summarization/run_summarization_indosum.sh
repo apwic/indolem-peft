@@ -13,10 +13,8 @@ export PATIENCE=5
 export SEED=42
 export DATASET=liputan6
 export DATA_DIR=./data/$DATASET
-export DATASET_NAME=id_liputan6
-export DATASET_CONFIG_NAME=canonical
-export TEXT_COLUMN="clean_article"
-export SUMMARY_COLUMN="clean_summary"
+export TEXT_COLUMN="paragraphs"
+export SUMMARY_COLUMN="summary"
 export SOURCE_PREFIX="summarize: "
 
 source ./script/$DATASET/run_summarization_base.sh
