@@ -11,6 +11,7 @@ do
         OUTPUT_DIR="bin/$DATASET-seq_bn-rf${reduction_factor}-$i"
         TRAIN_FILE="$DATA_DIR/train$i.csv"
         VALIDATION_FILE="$DATA_DIR/dev$i.csv"
+        TEST_FILE="$DATA_DIR/test$i.csv"
 
         python run_sentiment.py \
             --model_name_or_path $MODEL \
