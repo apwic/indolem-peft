@@ -8,7 +8,7 @@ do
     do
         echo "Training on fold $i with Seq Bottleneck (Adapter) on reduction_factor=${reduction_factor}"
 
-        OUTPUT_DIR="bin/$DATASET-seq_bn-rf{reduction_factor}-$i"
+        OUTPUT_DIR="bin/$DATASET-seq_bn-rf${reduction_factor}-$i"
         TRAIN_FILE="$DATA_DIR/train$i.csv"
         VALIDATION_FILE="$DATA_DIR/dev$i.csv"
 
