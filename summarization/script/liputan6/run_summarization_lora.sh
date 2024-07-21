@@ -5,7 +5,7 @@ for rank in "${ranks[@]}"
 do
 	echo "Training with LoRA r=$rank"
 
-	OUTPUT_DIR="bin/$DATASET-lora"
+	OUTPUT_DIR="bin/$DATASET-lora-${rank}"
 
 	python run_summarization.py \
 		--model_name_or_path $MODEL \

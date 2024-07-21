@@ -7,7 +7,7 @@ do
 	do
 		echo "Training on fold $i with LoRA r=$rank"
 
-		OUTPUT_DIR="bin/$DATASET-lora-$i"
+		OUTPUT_DIR="bin/$DATASET-lora-${rank}-$i"
 		TRAIN_FILE="$DATA_DIR/train.0$((i + 1)).jsonl"
 		VALIDATION_FILE="$DATA_DIR/dev.0$((i + 1)).jsonl"
 		TEST_FILE="$DATA_DIR/test.0$((i + 1)).jsonl"
