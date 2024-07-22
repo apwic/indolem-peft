@@ -17,6 +17,7 @@ do
 		--dataset_name  $DATASET_NAME \
 		--dataset_config_name $DATASET_CONFIG_NAME \
 		--dataset_data_dir $DATA_DIR\
+		--num_train_epochs $NUM_EPOCHS \
 		--per_device_train_batch_size $TRAIN_BATCH_SIZE \
 		--per_device_eval_batch_size $EVAL_BATCH_SIZE \
 		--learning_rate $LEARNING_RATE \
