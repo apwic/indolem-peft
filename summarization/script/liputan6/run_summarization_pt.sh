@@ -40,7 +40,7 @@ do
 		--metric_for_best_model "rouge1" \
 		--report_to "wandb" \
 		--push_to_hub \
-		--project_name "indolem-pelt-$DATASET" \
+		--project_name "indolem-pelt-$DATASET-$SUMMARY_TYPE" \
 		--group_name "pt-pl${prefix_length}" \
 		--run_name "$DATASET-pt-pl${prefix_length}" \
 		--max_train_samples $MAX_TRAIN_SAMPLES \

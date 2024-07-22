@@ -16,11 +16,24 @@ export DATA_DIR=./data/$DATASET
 export DATASET_NAME=id_liputan6
 export DATASET_CONFIG_NAME=canonical
 export TEXT_COLUMN="clean_article"
-export SUMMARY_COLUMN="clean_summary"
 export SOURCE_PREFIX="summarize: "
 export MAX_TRAIN_SAMPLES=1000
 export MAX_EVAL_SAMPLES=1000
 export MAX_PREDICT_SAMPLES=1000
+
+# Abstractive Summary
+export SUMMARY_TYPE=abstractive
+export SUMMARY_COLUMN="clean_summary"
+
+source ./script/$DATASET/run_summarization_base.sh
+source ./script/$DATASET/run_summarization_lora.sh
+source ./script/$DATASET/run_summarization_pt.sh
+source ./script/$DATASET/run_summarization_seq_bn.sh
+source ./script/$DATASET/run_summarization_unipelt.sh
+
+# Extractive Summary
+export SUMMARY_TYPE=extractive
+export SUMMARY_COLUMN="extractive_summary"
 
 source ./script/$DATASET/run_summarization_base.sh
 source ./script/$DATASET/run_summarization_lora.sh
