@@ -38,6 +38,9 @@ python run_summarization.py \
 	--project_name "indolem-pelt-$DATASET" \
 	--group_name "baseline" \
 	--run_name "$DATASET-base" \
+	--max_train_samples $MAX_TRAIN_SAMPLES \
+	--max_eval_samples $MAX_EVAL_SAMPLES \
+	--max_predict_samples $MAX_PREDICT_SAMPLES \
 	--do_train \
 	--do_eval \
 	--do_predict \

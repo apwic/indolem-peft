@@ -18,6 +18,9 @@ export DATASET_CONFIG_NAME=canonical
 export TEXT_COLUMN="clean_article"
 export SUMMARY_COLUMN="clean_summary"
 export SOURCE_PREFIX="summarize: "
+export MAX_TRAIN_SAMPLES=1000
+export MAX_EVAL_SAMPLES=1000
+export MAX_PREDICT_SAMPLES=1000
 
 source ./script/$DATASET/run_summarization_base.sh
 source ./script/$DATASET/run_summarization_lora.sh

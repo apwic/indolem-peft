@@ -42,6 +42,9 @@ do
 		--project_name "indolem-pelt-$DATASET" \
 		--group_name "pt-pl${prefix_length}" \
 		--run_name "$DATASET-pt-pl${prefix_length}" \
+		--max_train_samples $MAX_TRAIN_SAMPLES \
+		--max_eval_samples $MAX_EVAL_SAMPLES \
+		--max_predict_samples $MAX_PREDICT_SAMPLES \
 		--do_train \
 		--do_eval \
 		--do_predict \
